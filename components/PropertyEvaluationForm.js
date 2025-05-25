@@ -331,6 +331,19 @@ export default function PropertyEvaluationForm() {
     }
   };
 
+  const downloadFormData = () => {
+    const dataStr = JSON.stringify(formData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'immobilienbewertung.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateStep()) return;
@@ -350,6 +363,13 @@ export default function PropertyEvaluationForm() {
         setResponse(data.evaluation);
         setCurrentStep(steps.length);
         localStorage.removeItem('formData');
+        // Download-Option wird nach erfolgreichem Absenden angeboten
+        setTimeout(() => {
+          const shouldDownload = window.confirm('Möchten Sie Ihre eingegebenen Daten herunterladen?');
+          if (shouldDownload) {
+            downloadFormData();
+          }
+        }, 500);
       } else {
         setError(data.error || 'Fehler bei der Bewertung');
       }
@@ -489,8 +509,9 @@ export default function PropertyEvaluationForm() {
       <div className="w-100" style={{ maxWidth: '800px' }}>
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-4 px-3">
-          <div className="d-flex align-items-center">
-            <h2 className="fs-4 fw-bold text-primary m-0" style={{ color: '#00C4B4' }}>
+          <div className="d-flex align-items-center gap-2">
+            <img src="/logo.png" alt="Stilvoll Immobilien Logo" style={{ height: '40px' }} />
+            <h2 className="fs-4 fw-bold m-0" style={{ color: '#60C8E8' }}>
               Stilvoll Immobilien
             </h2>
           </div>
@@ -507,12 +528,12 @@ export default function PropertyEvaluationForm() {
             </span>
             <div className="progress" style={{ width: '120px', height: '8px', borderRadius: '4px', backgroundColor: '#E5E7EB' }}>
               <motion.div
-                className="progress-bar bg-info"
+                className="progress-bar"
                 role="progressbar"
                 initial={{ width: 0 }}
                 animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
                 transition={{ duration: 0.8, ease: 'easeInOut' }}
-                style={{ backgroundColor: '#00C4B4' }}
+                style={{ backgroundColor: '#60C8E8' }}
               />
             </div>
             <span className="text-muted fw-medium" style={{ fontSize: '14px' }}>
@@ -579,6 +600,18 @@ export default function PropertyEvaluationForm() {
                   {currentStep === steps.length - 1 ? 'Bewertung anfordern' : 'Weiter'}
                 </motion.button>
               </div>
+              {/* Terminanfrage-Button */}
+              <div className="mt-4">
+                <a
+                  href="https://wa.me/message/ZAG46FMPWMZ5G1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline-primary"
+                  style={{ padding: '12px 30px', fontSize: '16px', borderRadius: '8px', color: '#60C8E8', borderColor: '#60C8E8' }}
+                >
+                  Terminanfrage stellen
+                </a>
+              </div>
             </motion.form>
           ) : (
             response && (
@@ -591,14 +624,14 @@ export default function PropertyEvaluationForm() {
                 <h3 className="fs-3 fw-bold text-dark mb-4">Ihre Bewertung</h3>
                 <div className="card p-4 mb-4" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
                   <p className="fs-5">
-                    <strong style={{ color: '#00C4B4' }}>Geschätzter Verkehrswert:</strong>{' '}
+                    <strong style={{ color: '#60C8E8' }}>Geschätzter Verkehrswert:</strong>{' '}
                     <span style={{ color: '#FBBF24', fontWeight: 'bold' }}>{response.price}</span>
                   </p>
                   <p className="fs-5">
-                    <strong style={{ color: '#00C4B4' }}>Lagebewertung:</strong> {response.location}
+                    <strong style={{ color: '#60C8E8' }}>Lagebewertung:</strong> {response.location}
                   </p>
                   <p className="fs-5">
-                    <strong style={{ color: '#00C4B4' }}>Zustand:</strong> {response.condition}
+                    <strong style={{ color: '#60C8E8' }}>Zustand:</strong> {response.condition}
                   </p>
                 </div>
                 <motion.button
@@ -625,7 +658,7 @@ export default function PropertyEvaluationForm() {
             <button
               onClick={() => setCurrentStep(0)}
               className="ms-2 text-primary text-decoration-underline"
-              style={{ color: '#00C4B4' }}
+              style={{ color: '#60C8E8' }}
             >
               Zurück zum Anfang
             </button>
