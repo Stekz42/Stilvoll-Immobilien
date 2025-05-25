@@ -44,7 +44,7 @@ export default function PropertyEvaluationForm() {
       capitalizationRate: '',
     };
   });
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(-1); // Start bei -1 für Begrüßungskachel
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
@@ -364,6 +364,13 @@ export default function PropertyEvaluationForm() {
       textContent += `Geschätzter Verkehrswert: ${response.price}\n`;
       textContent += `Lagebewertung: ${response.location}\n`;
       textContent += `Zustand: ${response.condition}\n`;
+      textContent += '\nAufschlüsselung des Verkehrswerts:\n';
+      textContent += `Bodenwert: ${response.breakdown.Bodenwert} €\n`;
+      textContent += `Sachwert des Gebäudes: ${response.breakdown.SachwertGebäude} €\n`;
+      textContent += `Sachwert der Garage: ${response.breakdown.SachwertGarage} €\n`;
+      textContent += `Wert der Außenanlagen: ${response.breakdown.AußenanlagenWert} €\n`;
+      textContent += `Marktanpassung: +${response.breakdown.Marktanpassung} €\n`;
+      textContent += `Abschlag (Wegerecht): -${response.breakdown.AbschlagWegerecht} €\n`;
       textContent += '\nPreissteigernde Faktoren:\n';
       response.priceIncreaseFactors.forEach((factor, index) => {
         textContent += `${index + 1}. ${factor}\n`;
@@ -555,7 +562,7 @@ export default function PropertyEvaluationForm() {
   };
 
   // Berechne den Fortschritt, begrenze ihn auf 100 %
-  const progressPercentage = Math.min((currentStep / (steps.length - 1)) * 100, 100);
+  const progressPercentage = Math.min((currentStep >= 0 ? currentStep / (steps.length - 1) : 0) * 100, 100);
 
   return (
     <div
@@ -582,30 +589,57 @@ export default function PropertyEvaluationForm() {
           </div>
         </div>
 
-        {/* Fortschrittsanzeige */}
-        <div className="d-flex justify-content-end mb-4 px-3">
-          <div className="d-flex align-items-center gap-2">
-            <span className="text-muted fw-medium" style={{ fontSize: '14px' }}>
-              Bewertung
-            </span>
-            <div className="progress" style={{ width: '120px', height: '8px', borderRadius: '4px', backgroundColor: '#E5E7EB' }}>
-              <motion.div
-                className="progress-bar"
-                role="progressbar"
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercentage}%` }}
-                transition={{ duration: 0.8, ease: 'easeInOut' }}
-                style={{ backgroundColor: '#60C8E8' }}
-              />
+        {/* Fortschrittsanzeige (wird nur ab Step 0 angezeigt) */}
+        {currentStep >= 0 && (
+          <div className="d-flex justify-content-end mb-4 px-3">
+            <div className="d-flex align-items-center gap-2">
+              <span className="text-muted fw-medium" style={{ fontSize: '14px' }}>
+                Bewertung
+              </span>
+              <div className="progress" style={{ width: '120px', height: '8px', borderRadius: '4px', backgroundColor: '#E5E7EB' }}>
+                <motion.div
+                  className="progress-bar"
+                  role="progressbar"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercentage}%` }}
+                  transition={{ duration: 0.8, ease: 'easeInOut' }}
+                  style={{ backgroundColor: '#60C8E8' }}
+                />
+              </div>
+              <span className="text-muted fw-medium" style={{ fontSize: '14px' }}>
+                {Math.round(progressPercentage)}%
+              </span>
             </div>
-            <span className="text-muted fw-medium" style={{ fontSize: '14px' }}>
-              {Math.round(progressPercentage)}%
-            </span>
           </div>
-        </div>
+        )}
 
         <AnimatePresence mode="wait">
-          {currentStep < steps.length ? (
+          {currentStep === -1 ? (
+            <motion.div
+              key="welcome"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+              className="text-center"
+            >
+              <div className="card p-5 mb-4" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+                <h2 className="fs-3 fw-bold text-dark mb-3">Herzlich willkommen bei Stilvoll Immobilien</h2>
+                <p className="fs-5 text-muted mb-4">
+                  Bewerten Sie heute kostenlos Ihre Immobilie datenbasiert in unserem Online-Tool
+                </p>
+                <motion.button
+                  onClick={() => setCurrentStep(0)}
+                  className="btn btn-primary"
+                  style={{ padding: '12px 30px', fontSize: '16px', borderRadius: '8px', backgroundColor: '#60C8E8', borderColor: '#60C8E8' }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Jetzt starten
+                </motion.button>
+              </div>
+            </motion.div>
+          ) : currentStep < steps.length ? (
             <motion.form
               key={currentStep}
               initial={{ opacity: 0, x: 100 }}
@@ -696,7 +730,36 @@ export default function PropertyEvaluationForm() {
                     <strong style={{ color: '#60C8E8' }}>Zustand:</strong> {response.condition}
                   </p>
                   <div className="mt-4 text-start">
-                    <h5 className="fs-5 fw-semibold text-dark">Preissteigernde Faktoren:</h5>
+                    <h5 className="fs-5 fw-semibold text-dark">Aufschlüsselung des Verkehrswerts:</h5>
+                    <table className="table table-bordered">
+                      <tbody>
+                        <tr>
+                          <td>Bodenwert</td>
+                          <td>{response.breakdown.Bodenwert} €</td>
+                        </tr>
+                        <tr>
+                          <td>Sachwert des Gebäudes</td>
+                          <td>{response.breakdown.SachwertGebäude} €</td>
+                        </tr>
+                        <tr>
+                          <td>Sachwert der Garage</td>
+                          <td>{response.breakdown.SachwertGarage} €</td>
+                        </tr>
+                        <tr>
+                          <td>Wert der Außenanlagen</td>
+                          <td>{response.breakdown.AußenanlagenWert} €</td>
+                        </tr>
+                        <tr>
+                          <td>Marktanpassung</td>
+                          <td>+{response.breakdown.Marktanpassung} €</td>
+                        </tr>
+                        <tr>
+                          <td>Abschlag (Wegerecht)</td>
+                          <td>-{response.breakdown.AbschlagWegerecht} €</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <h5 className="fs-5 fw-semibold text-dark mt-3">Preissteigernde Faktoren:</h5>
                     <ul className="list-group list-group-flush">
                       {response.priceIncreaseFactors.map((factor, index) => (
                         <li key={index} className="list-group-item">{factor}</li>
