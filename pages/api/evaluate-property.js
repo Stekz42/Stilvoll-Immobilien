@@ -10,6 +10,11 @@ export default async function handler(req, res) {
   }
 
   const {
+    firstName,
+    lastName,
+    addressPersonal,
+    phone,
+    email,
     address,
     city,
     zipCode,
@@ -48,12 +53,17 @@ export default async function handler(req, res) {
 
   try {
     // Validierung
-    if (!address || !city || !zipCode || !livingArea || !rooms || !floors || !plotSize) {
+    if (!firstName || !lastName || !addressPersonal || !phone || !email || !address || !city || !zipCode || !livingArea || !rooms || !floors || !plotSize) {
       return res.status(400).json({ error: 'Pflichtfelder fehlen' });
     }
 
     // Daten für Bewertung formatieren mit sicherer Typkonvertierung
     const propertyData = {
+      firstName,
+      lastName,
+      addressPersonal,
+      phone,
+      email,
       address,
       city,
       zipCode,
@@ -123,7 +133,7 @@ export default async function handler(req, res) {
     const Verkehrswert = Math.round(VerkehrswertSachwert / 1000) * 1000;
 
     // Lagebewertung
-    let Lagebewertung = `Lage in ${city}: ${localLocation || 'Ruhige Wohnlage'}`;
+    let Lagebewertung = `${city}: ${localLocation || 'Ruhige Wohnlage'}`;
     if (propertyData.floodRisk === 'ja') {
       Lagebewertung += ', jedoch in einem Überschwemmungsgebiet (Wertminderung möglich)';
     }
@@ -134,7 +144,7 @@ export default async function handler(req, res) {
     }
 
     // Zustandsbewertung
-    let Zustand = `Zustand: ${propertyData.sanitaryCondition}`;
+    let Zustand = `${propertyData.sanitaryCondition}`;
     if (propertyData.modernizationDetails) {
       Zustand += `, Modernisierungen: ${propertyData.modernizationDetails}`;
     }
@@ -145,7 +155,7 @@ export default async function handler(req, res) {
       Zustand += `, Energieeffizienzklasse: ${propertyData.energyClass}`;
     }
 
-    // Preissteigernde Faktoren
+    // Preissteigernde Faktoren (nur 3)
     const priceIncreaseFactors = [];
     if (propertyData.publicTransportDistance && parseFloat(propertyData.publicTransportDistance) <= 1) {
       priceIncreaseFactors.push('Hervorragende Anbindung an öffentliche Verkehrsmittel');
@@ -156,17 +166,17 @@ export default async function handler(req, res) {
     if (propertyData.lastModernization && (2025 - propertyData.lastModernization) <= 10) {
       priceIncreaseFactors.push('Kürzliche Modernisierung in den letzten 10 Jahren');
     }
-    if (propertyData.livingArea > 150) {
+    if (propertyData.livingArea > 150 && priceIncreaseFactors.length < 3) {
       priceIncreaseFactors.push('Große Wohnfläche über 150 m²');
     }
-    if (propertyData.outdoorFacilities.length > 0) {
+    if (propertyData.outdoorFacilities.length > 0 && priceIncreaseFactors.length < 3) {
       priceIncreaseFactors.push(`Zusätzliche Außenanlagen (${propertyData.outdoorFacilities.join(', ')})`);
     }
-    while (priceIncreaseFactors.length < 5) {
+    while (priceIncreaseFactors.length < 3) {
       priceIncreaseFactors.push('Kein weiterer preissteigernder Faktor');
     }
 
-    // Preissenkende Faktoren
+    // Preissenkende Faktoren (nur 3)
     const priceDecreaseFactors = [];
     if (propertyData.floodRisk === 'ja') {
       priceDecreaseFactors.push('Lage in einem Überschwemmungsgebiet');
@@ -177,13 +187,13 @@ export default async function handler(req, res) {
     if (propertyData.repairBacklog) {
       priceDecreaseFactors.push('Vorhandener Reparaturstau');
     }
-    if (propertyData.constructionYear < 1970) {
+    if (propertyData.constructionYear < 1970 && priceDecreaseFactors.length < 3) {
       priceDecreaseFactors.push('Älteres Baujahr (vor 1970)');
     }
-    if (propertyData.encumbrances === 'ja') {
+    if (propertyData.encumbrances === 'ja' && priceDecreaseFactors.length < 3) {
       priceDecreaseFactors.push('Grundbuchliche Belastungen (z. B. Wegerecht)');
     }
-    while (priceDecreaseFactors.length < 5) {
+    while (priceDecreaseFactors.length < 3) {
       priceDecreaseFactors.push('Kein weiterer preissenkender Faktor');
     }
 
