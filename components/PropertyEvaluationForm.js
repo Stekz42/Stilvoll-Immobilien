@@ -554,6 +554,9 @@ export default function PropertyEvaluationForm() {
     );
   };
 
+  // Berechne den Fortschritt, begrenze ihn auf 100 %
+  const progressPercentage = Math.min((currentStep / (steps.length - 1)) * 100, 100);
+
   return (
     <div
       className="min-vh-100 d-flex flex-column align-items-center justify-content-between py-4 px-3"
@@ -590,13 +593,13 @@ export default function PropertyEvaluationForm() {
                 className="progress-bar"
                 role="progressbar"
                 initial={{ width: 0 }}
-                animate={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
+                animate={{ width: `${progressPercentage}%` }}
                 transition={{ duration: 0.8, ease: 'easeInOut' }}
                 style={{ backgroundColor: '#60C8E8' }}
               />
             </div>
             <span className="text-muted fw-medium" style={{ fontSize: '14px' }}>
-              {Math.round((currentStep / (steps.length - 1)) * 100)}%
+              {Math.round(progressPercentage)}%
             </span>
           </div>
         </div>
