@@ -352,6 +352,16 @@ export default function PropertyEvaluationForm() {
     }
   };
 
+  const handleStepClick = (index) => {
+    if (index <= currentStep || isStepCompleted(currentStep)) {
+      setCurrentStep(index);
+    }
+  };
+
+  const isStepCompleted = (stepIndex) => {
+    return steps[stepIndex].fields.every((field) => !field.required || formData[field.name]);
+  };
+
   const renderField = (field) => {
     const hasError = fieldErrors[field.name];
     return (
@@ -443,14 +453,10 @@ export default function PropertyEvaluationForm() {
     );
   };
 
-  const isStepCompleted = (stepIndex) => {
-    return steps[stepIndex].fields.every((field) => !field.required || formData[field.name]);
-  };
-
   return (
     <div className="min-h-screen bg-background flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 font-inter">
       <motion.div
-        className="max-w-4xl w-full bg-neutral shadow-card rounded-2xl overflow-hidden"
+        className="max-w-5xl w-full bg-neutral shadow-card rounded-2xl overflow-hidden"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1, ease: 'easeOut' }}
@@ -470,36 +476,28 @@ export default function PropertyEvaluationForm() {
 
         {/* Hauptinhalt */}
         <div className="p-8 sm:p-12">
-          {/* Fortschrittsanzeige */}
+          {/* Fortschrittsanzeige (Inhaltsverzeichnis als Kacheln) */}
           <div className="mb-12">
-            <div className="flex justify-between mb-4">
+            <div className="flex flex-wrap justify-center gap-4 mb-6">
               {steps.map((step, index) => (
-                <div
+                <motion.div
                   key={index}
-                  className={`flex-1 text-center text-sm font-medium flex flex-col items-center relative ${
-                    index <= currentStep ? 'text-primary' : 'text-gray-400'
+                  onClick={() => handleStepClick(index)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer shadow-sm transition-all duration-300 ${
+                    index <= currentStep
+                      ? isStepCompleted(index)
+                        ? 'bg-green-500 text-white'
+                        : 'bg-primary text-white'
+                      : 'bg-gray-200 text-gray-600 cursor-not-allowed'
                   }`}
+                  whileHover={{ scale: index <= currentStep || isStepCompleted(currentStep) ? 1.05 : 1 }}
                 >
-                  <motion.div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 border-2 ${
-                      index <= currentStep
-                        ? 'bg-primary text-white border-primary'
-                        : 'bg-neutral text-gray-600 border-gray-200'
-                    }`}
-                    animate={{
-                      scale: index === currentStep ? 1.2 : 1,
-                      rotate: index <= currentStep ? 360 : 0,
-                    }}
-                    transition={{ duration: 0.8, ease: 'easeInOut' }}
-                  >
-                    {isStepCompleted(index) && index < currentStep ? (
-                      <FaCheckCircle className="text-green-500" />
-                    ) : (
-                      step.icon
-                    )}
-                  </motion.div>
-                  <span className="text-xs sm:text-sm">{step.title}</span>
-                </div>
+                  {step.icon}
+                  <span className="text-sm font-medium">{step.title}</span>
+                  {isStepCompleted(index) && index < currentStep && (
+                    <FaCheckCircle className="text-white" />
+                  )}
+                </motion.div>
               ))}
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
@@ -529,11 +527,11 @@ export default function PropertyEvaluationForm() {
                 <h3 className="text-2xl sm:text-3xl font-semibold text-blue-800 flex items-center gap-3">
                   {steps[currentStep].icon} {steps[currentStep].title}
                 </h3>
-                <div className="space-y-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {steps[currentStep].fields.map((field) => (
                     <motion.div
                       key={field.name}
-                      className="bg-neutral p-6 rounded-xl shadow-card border border-gray-100 group"
+                      className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 group"
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.2 }}
