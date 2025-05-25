@@ -19,6 +19,12 @@ export default async function handler(req, res) {
     city,
     zipCode,
     propertyType,
+    numberOfUnits,
+    annualGrossRent,
+    operatingCosts,
+    vacancyRate,
+    usableArea,
+    commercialUseType,
     constructionYear,
     plotSize,
     soilValue,
@@ -53,8 +59,20 @@ export default async function handler(req, res) {
 
   try {
     // Validierung
-    if (!firstName || !lastName || !addressPersonal || !phone || !email || !address || !city || !zipCode || !livingArea || !rooms || !floors || !plotSize) {
+    if (!firstName || !lastName || !addressPersonal || !phone || !email || !address || !city || !zipCode || !plotSize) {
       return res.status(400).json({ error: 'Pflichtfelder fehlen' });
+    }
+    if (propertyType !== 'gewerbe' && !livingArea) {
+      return res.status(400).json({ error: 'Wohnfläche ist erforderlich' });
+    }
+    if (propertyType === 'gewerbe' && !usableArea) {
+      return res.status(400).json({ error: 'Nutzfläche ist erforderlich' });
+    }
+    if (propertyType === 'mehrfamilienhaus' && (!numberOfUnits || !annualGrossRent || !operatingCosts || !vacancyRate)) {
+      return res.status(400).json({ error: 'Pflichtfelder für Mehrfamilienhaus fehlen' });
+    }
+    if (propertyType === 'gewerbe' && (!annualGrossRent || !operatingCosts || !commercialUseType)) {
+      return res.status(400).json({ error: 'Pflichtfelder für Gewerbeimmobilie fehlen' });
     }
 
     // Daten für Bewertung formatieren mit sicherer Typkonvertierung
@@ -68,6 +86,12 @@ export default async function handler(req, res) {
       city,
       zipCode,
       propertyType,
+      numberOfUnits: parseInt(numberOfUnits, 10) || 0,
+      annualGrossRent: parseFloat(annualGrossRent) || 0,
+      operatingCosts: parseFloat(operatingCosts) || 0,
+      vacancyRate: parseFloat(vacancyRate) || 0,
+      usableArea: parseInt(usableArea, 10) || 0,
+      commercialUseType,
       constructionYear: parseInt(constructionYear, 10) || 2000,
       plotSize: parseInt(plotSize, 10) || 0,
       soilValue: parseFloat(soilValue) || 370,
@@ -100,10 +124,15 @@ export default async function handler(req, res) {
       capitalizationRate: parseFloat(capitalizationRate) || 2.8,
     };
 
-    // Sachwertverfahren (primäres Verfahren)
+    // Sachwertverfahren (primäres Verfahren für Einfamilienhäuser und Wohnungen)
     const Bodenwert = propertyData.plotSize * propertyData.soilValue;
-    const Normalherstellungskosten = propertyData.livingArea * 1550.80;
-    const Gesamtnutzungsdauer = propertyType === 'einfamilienhaus' ? 80 : 60;
+    let Normalherstellungskosten = 0;
+    if (propertyType === 'gewerbe') {
+      Normalherstellungskosten = propertyData.usableArea * 1200; // Gewerbe: 1200 €/m² angenommen
+    } else {
+      Normalherstellungskosten = propertyData.livingArea * 1550.80; // Einfamilienhaus/Wohnung: 1550,80 €/m²
+    }
+    const Gesamtnutzungsdauer = propertyType === 'einfamilienhaus' || propertyType === 'mehrfamilienhaus' ? 80 : propertyType === 'wohnung' ? 60 : 50; // Gewerbe: 50 Jahre
     const Alter = 2025 - propertyData.constructionYear;
     const Modernisierungsfaktor = propertyData.lastModernization
       ? (2025 - propertyData.lastModernization) <= 10
@@ -113,24 +142,35 @@ export default async function handler(req, res) {
     const Alterswertminderung = (Alter / Gesamtnutzungsdauer) * (1 - Modernisierungsfaktor);
     const SachwertGebäude = Normalherstellungskosten * (1 - Alterswertminderung);
     const SachwertGarage = propertyData.garage !== 'nein' ? propertyData.garageArea * 665.50 : 0;
-    const AußenanlagenWert = propertyData.outdoorFacilities.length * 10000;
+    const AußenanlagenWert = propertyType !== 'gewerbe' ? propertyData.outdoorFacilities.length * 10000 : 0;
     const VorläufigerSachwert = SachwertGebäude + SachwertGarage + AußenanlagenWert + Bodenwert;
     const Marktanpassung = VorläufigerSachwert * 1.09;
     const AbschlagWegerecht = propertyData.encumbrances === 'ja' ? 1387.5 : 0;
     const VerkehrswertSachwert = Marktanpassung - AbschlagWegerecht;
 
-    // Ertragswertverfahren (Plausibilitätsprüfung)
-    const Jahresrohertrag = propertyData.livingArea * propertyData.marketRent * 12;
-    const Bewirtschaftungskosten = 3279;
-    const Jahresreinertrag = Jahresrohertrag - Bewirtschaftungskosten;
+    // Ertragswertverfahren (wichtiger für Mehrfamilienhäuser und Gewerbe)
+    let Jahresrohertrag = 0;
+    if (propertyType === 'mehrfamilienhaus' || propertyType === 'gewerbe') {
+      Jahresrohertrag = propertyData.annualGrossRent;
+    } else {
+      Jahresrohertrag = propertyData.livingArea * propertyData.marketRent * 12;
+    }
+    const Bewirtschaftungskosten = propertyType === 'mehrfamilienhaus' || propertyType === 'gewerbe' ? propertyData.operatingCosts : 3279;
+    const Mietausfall = propertyType === 'mehrfamilienhaus' ? (Jahresrohertrag * (propertyData.vacancyRate / 100)) : 0;
+    const Jahresreinertrag = Jahresrohertrag - Bewirtschaftungskosten - Mietausfall;
     const Bodenwertverzinsung = Bodenwert * (propertyData.capitalizationRate / 100);
     const ReinertragGebäude = Jahresreinertrag - Bodenwertverzinsung;
-    const Vervielfältiger = 28.52;
+    const Vervielfältiger = propertyType === 'gewerbe' ? 20 : 28.52; // Gewerbe: niedrigerer Vervielfältiger
     const ErtragswertGebäude = ReinertragGebäude * Vervielfältiger;
     const VerkehrswertErtrag = ErtragswertGebäude + Bodenwert - AbschlagWegerecht;
 
     // Finaler Verkehrswert
-    const Verkehrswert = Math.round(VerkehrswertSachwert / 1000) * 1000;
+    let Verkehrswert;
+    if (propertyType === 'mehrfamilienhaus' || propertyType === 'gewerbe') {
+      Verkehrswert = Math.round(VerkehrswertErtrag / 1000) * 1000; // Ertragswertverfahren bevorzugt
+    } else {
+      Verkehrswert = Math.round(VerkehrswertSachwert / 1000) * 1000; // Sachwertverfahren für Einfamilienhäuser/Wohnungen
+    }
 
     // Lagebewertung
     let Lagebewertung = `${city}: ${localLocation || 'Ruhige Wohnlage'}`;
@@ -144,7 +184,7 @@ export default async function handler(req, res) {
     }
 
     // Zustandsbewertung
-    let Zustand = `${propertyData.sanitaryCondition}`;
+    let Zustand = propertyData.sanitaryCondition || 'Nicht angegeben';
     if (propertyData.modernizationDetails) {
       Zustand += `, Modernisierungen: ${propertyData.modernizationDetails}`;
     }
@@ -166,10 +206,10 @@ export default async function handler(req, res) {
     if (propertyData.lastModernization && (2025 - propertyData.lastModernization) <= 10) {
       priceIncreaseFactors.push('Kürzliche Modernisierung in den letzten 10 Jahren');
     }
-    if (propertyData.livingArea > 150 && priceIncreaseFactors.length < 3) {
-      priceIncreaseFactors.push('Große Wohnfläche über 150 m²');
+    if ((propertyData.livingArea > 150 || propertyData.usableArea > 200) && priceIncreaseFactors.length < 3) {
+      priceIncreaseFactors.push(`Große ${propertyType === 'gewerbe' ? 'Nutzfläche' : 'Wohnfläche'} über ${propertyType === 'gewerbe' ? '200' : '150'} m²`);
     }
-    if (propertyData.outdoorFacilities.length > 0 && priceIncreaseFactors.length < 3) {
+    if (propertyData.outdoorFacilities?.length > 0 && priceIncreaseFactors.length < 3) {
       priceIncreaseFactors.push(`Zusätzliche Außenanlagen (${propertyData.outdoorFacilities.join(', ')})`);
     }
     while (priceIncreaseFactors.length < 3) {
