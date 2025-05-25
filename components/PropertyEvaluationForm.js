@@ -1,7 +1,7 @@
 // components/PropertyEvaluationForm.js
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaHome, FaLandmark, FaBuilding, FaTools, FaMap, FaChartLine, FaCheckCircle } from 'react-icons/fa';
+import { FaHome, FaLandmark, FaBuilding, FaTools, FaMap, FaChartLine, FaCheckCircle, FaMapMarkerAlt } from 'react-icons/fa';
 
 export default function PropertyEvaluationForm() {
   const [formData, setFormData] = useState(() => {
@@ -385,24 +385,27 @@ export default function PropertyEvaluationForm() {
   const renderField = (field) => {
     const hasError = fieldErrors[field.name];
     return (
-      <div className="relative w-52">
+      <div className="relative w-full">
         {field.type === 'text' || field.type === 'number' ? (
           <motion.div
             className="relative"
             whileHover={{ scale: 1.02 }}
             whileFocus={{ scale: 1.02 }}
           >
-            <input
-              type={field.type}
-              name={field.name}
-              value={formData[field.name]}
-              onChange={handleChange}
-              className={`w-full max-w-md p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 text-base shadow-sm ${
-                hasError ? 'border-red-500' : 'border-gray-200'
-              }`}
-              placeholder={field.label}
-              required={field.required}
-            />
+            <div className="relative">
+              <input
+                type={field.type}
+                name={field.name}
+                value={formData[field.name]}
+                onChange={handleChange}
+                className={`w-full max-w-lg p-4 pl-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 text-base shadow-sm ${
+                  hasError ? 'border-red-500' : 'border-gray-200'
+                }`}
+                placeholder={field.label}
+                required={field.required}
+              />
+              <FaMapMarkerAlt className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            </div>
             {formData[field.name] && !hasError && (
               <FaCheckCircle className="absolute right-4 top-1/2 transform -translate-y-1/2 text-primary" />
             )}
@@ -425,7 +428,7 @@ export default function PropertyEvaluationForm() {
             name={field.name}
             value={formData[field.name]}
             onChange={handleChange}
-            className={`w-full max-w-md p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-white text-gray-800 text-base shadow-sm ${
+            className={`w-full max-w-lg p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-white text-gray-800 text-base shadow-sm ${
               hasError ? 'border-red-500' : 'border-gray-200'
             }`}
             whileHover={{ scale: 1.02 }}
@@ -441,7 +444,7 @@ export default function PropertyEvaluationForm() {
             name={field.name}
             value={formData[field.name]}
             onChange={handleChange}
-            className={`w-full max-w-md p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 text-base shadow-sm ${
+            className={`w-full max-w-lg p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 text-base shadow-sm ${
               hasError ? 'border-red-500' : 'border-gray-200'
             }`}
             rows="4"
@@ -474,7 +477,7 @@ export default function PropertyEvaluationForm() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-between py-16 px-4 sm:px-6 lg:px-8 font-roboto">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-between py-8 px-4 sm:px-6 lg:px-8 font-roboto">
       <div className="max-w-5xl w-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-8 px-4">
@@ -485,7 +488,7 @@ export default function PropertyEvaluationForm() {
         </div>
 
         {/* Fortschrittsanzeige */}
-        <div className="flex justify-end mb-8">
+        <div className="flex justify-end mb-8 px-4">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-600">Bewertung</span>
             <div className="w-32 bg-gray-200 rounded-full h-2">
@@ -513,13 +516,13 @@ export default function PropertyEvaluationForm() {
               onSubmit={currentStep === steps.length - 1 ? handleSubmit : (e) => e.preventDefault()}
               className="space-y-10 flex flex-col items-center"
             >
-              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+              <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                 {steps[currentStep].title}
               </h3>
               <div className="space-y-8 w-full max-w-2xl">
                 {[...new Set(steps[currentStep].fields.map((field) => field.section))].map((section) => (
                   <div key={section} className="space-y-5">
-                    <h4 className="text-base font-semibold text-gray-700 text-center">{section}</h4>
+                    <h4 className="text-lg font-semibold text-gray-700 text-center">{section}</h4>
                     <div className="flex flex-col items-center gap-6">
                       {steps[currentStep].fields
                         .filter((field) => field.section === section)
@@ -571,7 +574,7 @@ export default function PropertyEvaluationForm() {
                 transition={{ duration: 0.8, ease: 'easeOut' }}
                 className="text-center"
               >
-                <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center justify-center gap-2">
+                <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center justify-center gap-2">
                   <FaChartLine className="text-secondary" /> Ihre Bewertung
                 </h3>
                 <div className="bg-neutral p-8 rounded-xl space-y-6 shadow-card">
