@@ -93,7 +93,7 @@ export default async function handler(req, res) {
     try {
       const msg = {
         to: 'info@konzept-stilvoll.de',
-        from: 'DEINE_VERIFIZIERTE_EMAIL@DOMAIN.COM', // Ersetze dies mit deiner verifizierten E-Mail-Adresse
+        from: 'info@stilvoll-immobilien.com', // Ersetze dies mit deiner verifizierten E-Mail-Adresse
         subject: 'Neue Immobilienbewertung',
         text: `Eine neue Bewertung wurde eingereicht:\n\n${JSON.stringify(propertyData, null, 2)}`,
       };
