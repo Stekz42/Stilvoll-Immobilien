@@ -59,9 +59,9 @@ export default function PropertyEvaluationForm() {
       title: 'Allgemeine Informationen',
       icon: <FaHome />,
       fields: [
-        { name: 'address', label: 'Adresse (Straße, Hausnummer)', type: 'text', required: true, section: 'Adresse' },
-        { name: 'city', label: 'Stadt', type: 'text', required: true, section: 'Adresse' },
-        { name: 'zipCode', label: 'Postleitzahl', type: 'text', required: true, section: 'Adresse' },
+        { name: 'address', label: 'Adresse (Straße, Hausnummer)', type: 'text', required: true, section: 'Adresse', description: 'Geben Sie die vollständige Adresse der Immobilie ein (z. B. Musterstraße 1).' },
+        { name: 'city', label: 'Stadt', type: 'text', required: true, section: 'Adresse', description: 'Geben Sie die Stadt ein, in der sich die Immobilie befindet (z. B. Berlin).' },
+        { name: 'zipCode', label: 'Postleitzahl', type: 'text', required: true, section: 'Adresse', description: 'Geben Sie die Postleitzahl der Immobilie ein (z. B. 10115).' },
         {
           name: 'propertyType',
           label: 'Immobilientyp',
@@ -72,8 +72,9 @@ export default function PropertyEvaluationForm() {
             { value: 'gewerbe', label: 'Gewerbe' },
           ],
           section: 'Immobilientyp',
+          description: 'Wählen Sie den Typ der Immobilie aus (z. B. Einfamilienhaus).',
         },
-        { name: 'constructionYear', label: 'Baujahr', type: 'number', required: true, section: 'Immobilientyp', tooltip: 'Geben Sie das Jahr der Fertigstellung des Gebäudes ein.' },
+        { name: 'constructionYear', label: 'Baujahr', type: 'number', required: true, section: 'Immobilientyp', description: 'Geben Sie das Jahr ein, in dem die Immobilie fertiggestellt wurde (z. B. 1990).' },
         {
           name: 'evaluationPurpose',
           label: 'Anlass der Bewertung',
@@ -84,6 +85,7 @@ export default function PropertyEvaluationForm() {
             { value: 'sonstiges', label: 'Sonstiges' },
           ],
           section: 'Immobilientyp',
+          description: 'Wählen Sie den Grund für die Bewertung aus (z. B. Verkauf).',
         },
       ],
     },
@@ -91,13 +93,13 @@ export default function PropertyEvaluationForm() {
       title: 'Grundstück',
       icon: <FaLandmark />,
       fields: [
-        { name: 'plotSize', label: 'Grundstücksgröße (m²)', type: 'number', required: true, section: 'Grundstücksdetails' },
+        { name: 'plotSize', label: 'Grundstücksgröße (m²)', type: 'number', required: true, section: 'Grundstücksdetails', description: 'Geben Sie die Größe des Grundstücks in Quadratmetern ein (z. B. 500).' },
         {
           name: 'soilValue',
           label: 'Bodenrichtwert (€/m², falls bekannt)',
           type: 'number',
-          tooltip: 'Den Bodenrichtwert finden Sie bei Ihrem Gutachterausschuss oder auf boris.nrw.de',
           section: 'Grundstücksdetails',
+          description: 'Geben Sie den Bodenrichtwert pro Quadratmeter ein, falls bekannt (z. B. 370). Diesen finden Sie beim Gutachterausschuss oder auf boris.nrw.de.',
         },
         {
           name: 'developmentStatus',
@@ -109,6 +111,7 @@ export default function PropertyEvaluationForm() {
             { value: 'nicht', label: 'Nicht erschlossen' },
           ],
           section: 'Grundstücksdetails',
+          description: 'Wählen Sie aus, ob das Grundstück vollständig, teilweise oder nicht erschlossen ist (z. B. vollständig erschlossen).',
         },
         {
           name: 'soilCondition',
@@ -119,6 +122,7 @@ export default function PropertyEvaluationForm() {
             { value: 'problematisch', label: 'Problematisch' },
           ],
           section: 'Grundstücksdetails',
+          description: 'Wählen Sie aus, ob der Baugrund normal tragfähig oder problematisch ist (z. B. normal tragfähig).',
         },
         {
           name: 'zoningPlan',
@@ -130,6 +134,7 @@ export default function PropertyEvaluationForm() {
             { value: 'gewerbegebiet', label: 'Gewerbegebiet' },
           ],
           section: 'Bebauungsdetails',
+          description: 'Wählen Sie den Typ des Bebauungsplans aus (z. B. Wohngebiet).',
         },
         {
           name: 'encumbrances',
@@ -139,8 +144,8 @@ export default function PropertyEvaluationForm() {
             { value: 'nein', label: 'Nein' },
             { value: 'ja', label: 'Ja' },
           ],
-          tooltip: 'Grundbuchliche Belastungen sind Rechte Dritter, wie z. B. ein Wegerecht oder eine Hypothek, die im Grundbuch eingetragen sind.',
           section: 'Bebauungsdetails',
+          description: 'Wählen Sie aus, ob grundbuchliche Belastungen wie Wegerechte oder Hypotheken eingetragen sind (z. B. Nein).',
         },
         {
           name: 'floodRisk',
@@ -150,8 +155,8 @@ export default function PropertyEvaluationForm() {
             { value: 'nein', label: 'Nein' },
             { value: 'ja', label: 'Ja' },
           ],
-          tooltip: 'Informationen zu Überschwemmungsgebieten finden Sie bei Ihrer Gemeinde oder auf Karten von Umweltbehörden.',
           section: 'Bebauungsdetails',
+          description: 'Wählen Sie aus, ob die Immobilie in einem Überschwemmungsgebiet liegt. Diese Information finden Sie bei Ihrer Gemeinde oder auf Karten von Umweltbehörden.',
         },
       ],
     },
@@ -159,9 +164,9 @@ export default function PropertyEvaluationForm() {
       title: 'Gebäude und bauliche Anlagen',
       icon: <FaBuilding />,
       fields: [
-        { name: 'livingArea', label: 'Wohnfläche (m²)', type: 'number', required: true, section: 'Gebäudedetails', tooltip: 'Geben Sie die tatsächliche Wohnfläche ohne Nebenflächen (z. B. Keller) ein.' },
-        { name: 'rooms', label: 'Anzahl der Zimmer', type: 'number', required: true, section: 'Gebäudedetails' },
-        { name: 'floors', label: 'Anzahl der Vollgeschosse', type: 'number', required: true, section: 'Gebäudedetails' },
+        { name: 'livingArea', label: 'Wohnfläche (m²)', type: 'number', required: true, section: 'Gebäudedetails', description: 'Geben Sie die tatsächliche Wohnfläche ohne Nebenflächen (z. B. Keller) in Quadratmetern ein (z. B. 120).' },
+        { name: 'rooms', label: 'Anzahl der Zimmer', type: 'number', required: true, section: 'Gebäudedetails', description: 'Geben Sie die Anzahl der Zimmer ein (z. B. 4).' },
+        { name: 'floors', label: 'Anzahl der Vollgeschosse', type: 'number', required: true, section: 'Gebäudedetails', description: 'Geben Sie die Anzahl der Vollgeschosse ein (z. B. 2).' },
         {
           name: 'basement',
           label: 'Unterkellert',
@@ -171,6 +176,7 @@ export default function PropertyEvaluationForm() {
             { value: 'nein', label: 'Nein' },
           ],
           section: 'Gebäudedetails',
+          description: 'Wählen Sie aus, ob die Immobilie unterkellert ist (z. B. Ja).',
         },
         {
           name: 'roofing',
@@ -182,6 +188,7 @@ export default function PropertyEvaluationForm() {
             { value: 'walmdach', label: 'Walmdach' },
           ],
           section: 'Gebäudedetails',
+          description: 'Wählen Sie den Typ der Bedachung aus (z. B. Satteldach).',
         },
         {
           name: 'garage',
@@ -193,8 +200,9 @@ export default function PropertyEvaluationForm() {
             { value: 'mehrfach', label: 'Mehrfachgarage' },
           ],
           section: 'Zusätzliche Anlagen',
+          description: 'Wählen Sie aus, ob eine Garage vorhanden ist (z. B. Nein).',
         },
-        { name: 'garageArea', label: 'Garagefläche (m²)', type: 'number', section: 'Zusätzliche Anlagen' },
+        { name: 'garageArea', label: 'Garagefläche (m²)', type: 'number', section: 'Zusätzliche Anlagen', description: 'Geben Sie die Fläche der Garage in Quadratmetern ein, falls vorhanden (z. B. 30).' },
         {
           name: 'outdoorFacilities',
           label: 'Außenanlagen',
@@ -205,6 +213,7 @@ export default function PropertyEvaluationForm() {
             { value: 'garten', label: 'Garten' },
           ],
           section: 'Zusätzliche Anlagen',
+          description: 'Wählen Sie alle zutreffenden Außenanlagen aus (z. B. Terrasse, Garten).',
         },
         {
           name: 'equipmentLevel',
@@ -216,6 +225,7 @@ export default function PropertyEvaluationForm() {
             { value: 'gehoben', label: 'Gehoben' },
           ],
           section: 'Ausstattung',
+          description: 'Wählen Sie den Ausstattungsgrad der Immobilie aus (z. B. Mittel).',
         },
         {
           name: 'heatingSystem',
@@ -227,6 +237,7 @@ export default function PropertyEvaluationForm() {
             { value: 'wärmepumpe', label: 'Wärmepumpe' },
           ],
           section: 'Ausstattung',
+          description: 'Wählen Sie das Heizungssystem aus (z. B. Gas).',
         },
         {
           name: 'sanitaryCondition',
@@ -238,6 +249,7 @@ export default function PropertyEvaluationForm() {
             { value: 'renovierungsbedürftig', label: 'Renovierungsbedürftig' },
           ],
           section: 'Ausstattung',
+          description: 'Wählen Sie den Zustand der Sanitäranlagen aus (z. B. Baujahrestypisch).',
         },
       ],
     },
@@ -245,9 +257,9 @@ export default function PropertyEvaluationForm() {
       title: 'Modernisierungen und Zustand',
       icon: <FaTools />,
       fields: [
-        { name: 'lastModernization', label: 'Jahr der letzten Modernisierung', type: 'number', section: 'Modernisierungen' },
-        { name: 'modernizationDetails', label: 'Details zu Modernisierungen', type: 'textarea', section: 'Modernisierungen' },
-        { name: 'repairBacklog', label: 'Reparaturstau oder Baumängel', type: 'textarea', section: 'Zustand' },
+        { name: 'lastModernization', label: 'Jahr der letzten Modernisierung', type: 'number', section: 'Modernisierungen', description: 'Geben Sie das Jahr der letzten Modernisierung ein, falls zutreffend (z. B. 2015).' },
+        { name: 'modernizationDetails', label: 'Details zu Modernisierungen', type: 'textarea', section: 'Modernisierungen', description: 'Geben Sie Details zu den Modernisierungen ein (z. B. neue Fenster 2015).' },
+        { name: 'repairBacklog', label: 'Reparaturstau oder Baumängel', type: 'textarea', section: 'Zustand', description: 'Beschreiben Sie eventuellen Reparaturstau oder Baumängel (z. B. undichtes Dach).' },
         {
           name: 'accessibility',
           label: 'Barrierefrei',
@@ -257,6 +269,7 @@ export default function PropertyEvaluationForm() {
             { value: 'ja', label: 'Ja' },
           ],
           section: 'Zustand',
+          description: 'Wählen Sie aus, ob die Immobilie barrierefrei ist (z. B. Nein).',
         },
         {
           name: 'energyCertificate',
@@ -267,26 +280,29 @@ export default function PropertyEvaluationForm() {
             { value: 'ja', label: 'Ja' },
           ],
           section: 'Energie',
+          description: 'Wählen Sie aus, ob ein Energieausweis vorhanden ist (z. B. Nein).',
         },
-        { name: 'energyClass', label: 'Energieeffizienzklasse (falls vorhanden)', type: 'text', section: 'Energie' },
+        { name: 'energyClass', label: 'Energieeffizienzklasse (falls vorhanden)', type: 'text', section: 'Energie', description: 'Geben Sie die Energieeffizienzklasse ein, falls ein Energieausweis vorhanden ist (z. B. C).' },
       ],
     },
     {
       title: 'Lage und Infrastruktur',
       icon: <FaMap />,
       fields: [
-        { name: 'localLocation', label: 'Beschreibung der lokalen Lage', type: 'textarea', section: 'Lage' },
+        { name: 'localLocation', label: 'Beschreibung der lokalen Lage', type: 'textarea', section: 'Lage', description: 'Beschreiben Sie die Lage der Immobilie (z. B. ruhige Wohngegend).' },
         {
           name: 'publicTransportDistance',
           label: 'Entfernung zu öffentlichen Verkehrsmitteln (km oder Minuten)',
           type: 'text',
           section: 'Infrastruktur',
+          description: 'Geben Sie die Entfernung zu öffentlichen Verkehrsmitteln ein (z. B. 0.5 km oder 5 Minuten).',
         },
         {
           name: 'amenitiesDistance',
           label: 'Entfernung zu Schulen, Geschäften, Freizeiteinrichtungen (km)',
           type: 'text',
           section: 'Infrastruktur',
+          description: 'Geben Sie die Entfernung zu wichtigen Einrichtungen in Kilometern ein (z. B. 1 km).',
         },
       ],
     },
@@ -299,9 +315,9 @@ export default function PropertyEvaluationForm() {
           label: 'Marktübliche Miete pro m² (€/m²/Monat, falls bekannt)',
           type: 'number',
           section: 'Marktdaten',
-          tooltip: 'Informationen zur marktüblichen Miete finden Sie in Mietspiegeln oder bei Immobilienportalen.',
+          description: 'Geben Sie die marktübliche Miete pro Quadratmeter ein, falls bekannt (z. B. 12). Diese Information finden Sie in Mietspiegeln oder bei Immobilienportalen.',
         },
-        { name: 'capitalizationRate', label: 'Liegenschaftszinssatz (%, falls bekannt)', type: 'number', section: 'Marktdaten' },
+        { name: 'capitalizationRate', label: 'Liegenschaftszinssatz (%, falls bekannt)', type: 'number', section: 'Marktdaten', description: 'Geben Sie den Liegenschaftszinssatz in Prozent ein, falls bekannt (z. B. 2.8).' },
       ],
     },
   ];
@@ -452,41 +468,60 @@ export default function PropertyEvaluationForm() {
                 {hasError}
               </div>
             )}
-            {field.tooltip && (
-              <div className="position-absolute" style={{ right: '40px', top: '50%', transform: 'translateY(-50%)', color: '#6c757d', cursor: 'help' }}>
-                <span className="bg-dark text-white p-2 rounded position-absolute" style={{ display: 'none', top: '-40px', right: '0', fontSize: '12px' }}>
-                  {field.tooltip}
-                </span>
-                ❓
-              </div>
+            {field.description && (
+              <small className="d-block text-muted mt-1" style={{ fontSize: '12px' }}>
+                {field.description}
+              </small>
             )}
           </motion.div>
         ) : field.type === 'select' ? (
-          <motion.select
-            name={field.name}
-            value={formData[field.name]}
-            onChange={handleChange}
-            className={`form-select ${hasError ? 'is-invalid' : ''}`}
-            style={{ fontSize: '16px', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
-            whileHover={{ scale: 1.02 }}
-          >
-            {field.options.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </motion.select>
+          <motion.div whileHover={{ scale: 1.02 }}>
+            <motion.select
+              name={field.name}
+              value={formData[field.name]}
+              onChange={handleChange}
+              className={`form-select ${hasError ? 'is-invalid' : ''}`}
+              style={{ fontSize: '16px', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
+            >
+              {field.options.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </motion.select>
+            {hasError && (
+              <div className="invalid-feedback" style={{ display: 'block', fontSize: '14px' }}>
+                {hasError}
+              </div>
+            )}
+            {field.description && (
+              <small className="d-block text-muted mt-1" style={{ fontSize: '12px' }}>
+                {field.description}
+              </small>
+            )}
+          </motion.div>
         ) : field.type === 'textarea' ? (
-          <motion.textarea
-            name={field.name}
-            value={formData[field.name]}
-            onChange={handleChange}
-            className={`form-control ${hasError ? 'is-invalid' : ''}`}
-            style={{ fontSize: '16px', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
-            rows="4"
-            placeholder={field.label}
-            whileHover={{ scale: 1.02 }}
-          />
+          <motion.div whileHover={{ scale: 1.02 }}>
+            <motion.textarea
+              name={field.name}
+              value={formData[field.name]}
+              onChange={handleChange}
+              className={`form-control ${hasError ? 'is-invalid' : ''}`}
+              style={{ fontSize: '16px', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
+              rows="4"
+              placeholder={field.label}
+            />
+            {hasError && (
+              <div className="invalid-feedback" style={{ display: 'block', fontSize: '14px' }}>
+                {hasError}
+              </div>
+            )}
+            {field.description && (
+              <small className="d-block text-muted mt-1" style={{ fontSize: '12px' }}>
+                {field.description}
+              </small>
+            )}
+          </motion.div>
         ) : field.type === 'checkbox' ? (
           <div className="d-flex flex-column gap-2">
             {field.options.map((option) => (
@@ -508,6 +543,11 @@ export default function PropertyEvaluationForm() {
                 <span style={{ fontSize: '16px', color: '#333' }}>{option.label}</span>
               </motion.label>
             ))}
+            {field.description && (
+              <small className="d-block text-muted mt-1" style={{ fontSize: '12px' }}>
+                {field.description}
+              </small>
+            )}
           </div>
         ) : null}
       </div>
