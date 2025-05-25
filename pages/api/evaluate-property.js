@@ -1,4 +1,9 @@
 // pages/api/evaluate-property.js
+import { MongoClient } from 'mongodb';
+
+const uri = process.env.MONGODB_URI;
+const client = new MongoClient(uri);
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -157,7 +162,6 @@ export default async function handler(req, res) {
     if (propertyData.outdoorFacilities.length > 0) {
       priceIncreaseFactors.push(`Zusätzliche Außenanlagen (${propertyData.outdoorFacilities.join(', ')})`);
     }
-    // Fülle auf 5 Faktoren auf, falls weniger vorhanden
     while (priceIncreaseFactors.length < 5) {
       priceIncreaseFactors.push('Kein weiterer preissteigernder Faktor');
     }
@@ -179,18 +183,47 @@ export default async function handler(req, res) {
     if (propertyData.encumbrances === 'ja') {
       priceDecreaseFactors.push('Grundbuchliche Belastungen (z. B. Wegerecht)');
     }
-    // Fülle auf 5 Faktoren auf, falls weniger vorhanden
     while (priceDecreaseFactors.length < 5) {
       priceDecreaseFactors.push('Kein weiterer preissenkender Faktor');
     }
 
+    // Evaluation-Objekt erstellen
     const evaluation = {
       price: `${Verkehrswert.toLocaleString('de-DE')} €`,
       location: Lagebewertung,
       condition: Zustand,
       priceIncreaseFactors,
       priceDecreaseFactors,
+      breakdown: {
+        Bodenwert: Bodenwert.toLocaleString('de-DE'),
+        SachwertGebäude: SachwertGebäude.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+        SachwertGarage: SachwertGarage.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+        AußenanlagenWert: AußenanlagenWert.toLocaleString('de-DE'),
+        Marktanpassung: (Marktanpassung - VorläufigerSachwert).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+        AbschlagWegerecht: AbschlagWegerecht.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      },
     };
+
+    // Daten in MongoDB speichern
+    try {
+      await client.connect();
+      const database = client.db('immobilienbewertung');
+      const submissions = database.collection('submissions');
+
+      const submission = {
+        formData: propertyData,
+        evaluation,
+        timestamp: new Date(),
+      };
+
+      await submissions.insertOne(submission);
+      console.log('Daten erfolgreich in MongoDB gespeichert');
+    } catch (dbError) {
+      console.error('Fehler beim Speichern in MongoDB:', dbError.message);
+      // Trotz Datenbankfehler die Bewertung zurückgeben
+    } finally {
+      await client.close();
+    }
 
     res.status(200).json(evaluation);
   } catch (error) {
