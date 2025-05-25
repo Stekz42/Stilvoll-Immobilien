@@ -7,18 +7,18 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#1E40AF', // Weicherer Blauton für Professionalität
-        secondary: '#FBBF24', // Weicherer Goldton für Eleganz
-        neutral: '#FFFFFF', // Weiß für Klarheit
-        accent: '#E5E7EB', // Hellgrau für Akzente
-        background: '#F5F7FA', // Sehr helles Blau/Grau für den Hintergrund
+        primary: '#1E3A8A', // Dunkelblau für Überschriften/Akzente
+        secondary: '#FBBF24', // Gold als Akzent (z. B. für abgeschlossene Schritte)
+        neutral: '#FFFFFF', // Weiß für Kacheln
+        accent: '#D1D5DB', // Hellgrau für Linien
+        background: '#F9FAFB', // Hintergrundfarbe
       },
       fontFamily: {
-        inter: ['Inter', 'sans-serif'],
+        roboto: ['Roboto', 'sans-serif'],
       },
       boxShadow: {
-        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        'input': '0 2px 4px rgba(0, 0, 0, 0.05)',
+        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        'input': '0 1px 2px rgba(0, 0, 0, 0.05)',
       },
       borderRadius: {
         'xl': '1rem',
