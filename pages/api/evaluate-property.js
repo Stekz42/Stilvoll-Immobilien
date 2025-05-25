@@ -1,4 +1,7 @@
 // pages/api/evaluate-property.js
+import fs from 'fs';
+import path from 'path';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -85,6 +88,16 @@ export default async function handler(req, res) {
   };
 
   try {
+    // Daten speichern (z. B. in einer Datei)
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filePath = path.join(process.cwd(), 'data', `submission-${timestamp}.json`);
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, JSON.stringify(propertyData, null, 2));
+
+    // E-Mail-Senden-Logik (Platzhalter)
+    // Hier müsste ein E-Mail-Service wie SendGrid integriert werden
+    console.log('Daten sollten an info@konzept-stilvoll.de gesendet werden:', propertyData);
+
     // Sachwertverfahren (primäres Verfahren)
     const Bodenwert = propertyData.plotSize * propertyData.soilValue;
     const Normalherstellungskosten = propertyData.livingArea * 1550.80;
