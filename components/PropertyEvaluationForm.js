@@ -59,9 +59,9 @@ export default function PropertyEvaluationForm() {
       title: 'Allgemeine Informationen',
       icon: <FaHome />,
       fields: [
-        { name: 'address', label: 'Adresse (Straße, Hausnummer)', type: 'text', required: true },
-        { name: 'city', label: 'Stadt', type: 'text', required: true },
-        { name: 'zipCode', label: 'Postleitzahl', type: 'text', required: true },
+        { name: 'address', label: 'Adresse (Straße, Hausnummer)', type: 'text', required: true, section: 'Adresse' },
+        { name: 'city', label: 'Stadt', type: 'text', required: true, section: 'Adresse' },
+        { name: 'zipCode', label: 'Postleitzahl', type: 'text', required: true, section: 'Adresse' },
         {
           name: 'propertyType',
           label: 'Immobilientyp',
@@ -71,8 +71,9 @@ export default function PropertyEvaluationForm() {
             { value: 'wohnung', label: 'Wohnung' },
             { value: 'gewerbe', label: 'Gewerbe' },
           ],
+          section: 'Immobilientyp',
         },
-        { name: 'constructionYear', label: 'Baujahr', type: 'number', required: true },
+        { name: 'constructionYear', label: 'Baujahr', type: 'number', required: true, section: 'Immobilientyp' },
         {
           name: 'evaluationPurpose',
           label: 'Anlass der Bewertung',
@@ -82,6 +83,7 @@ export default function PropertyEvaluationForm() {
             { value: 'finanzierung', label: 'Finanzierung' },
             { value: 'sonstiges', label: 'Sonstiges' },
           ],
+          section: 'Immobilientyp',
         },
       ],
     },
@@ -89,12 +91,13 @@ export default function PropertyEvaluationForm() {
       title: 'Grundstück',
       icon: <FaLandmark />,
       fields: [
-        { name: 'plotSize', label: 'Grundstücksgröße (m²)', type: 'number', required: true },
+        { name: 'plotSize', label: 'Grundstücksgröße (m²)', type: 'number', required: true, section: 'Grundstücksdetails' },
         {
           name: 'soilValue',
           label: 'Bodenrichtwert (€/m², falls bekannt)',
           type: 'number',
           tooltip: 'Den Bodenrichtwert finden Sie bei Ihrem Gutachterausschuss oder auf boris.nrw.de',
+          section: 'Grundstücksdetails',
         },
         {
           name: 'developmentStatus',
@@ -105,6 +108,7 @@ export default function PropertyEvaluationForm() {
             { value: 'teilweise', label: 'Teilweise erschlossen' },
             { value: 'nicht', label: 'Nicht erschlossen' },
           ],
+          section: 'Grundstücksdetails',
         },
         {
           name: 'soilCondition',
@@ -114,6 +118,7 @@ export default function PropertyEvaluationForm() {
             { value: 'normal', label: 'Normal tragfähig' },
             { value: 'problematisch', label: 'Problematisch' },
           ],
+          section: 'Grundstücksdetails',
         },
         {
           name: 'zoningPlan',
@@ -124,6 +129,7 @@ export default function PropertyEvaluationForm() {
             { value: 'mischgebiet', label: 'Mischgebiet' },
             { value: 'gewerbegebiet', label: 'Gewerbegebiet' },
           ],
+          section: 'Bebauungsdetails',
         },
         {
           name: 'encumbrances',
@@ -133,6 +139,7 @@ export default function PropertyEvaluationForm() {
             { value: 'nein', label: 'Nein' },
             { value: 'ja', label: 'Ja' },
           ],
+          section: 'Bebauungsdetails',
         },
         {
           name: 'floodRisk',
@@ -142,6 +149,7 @@ export default function PropertyEvaluationForm() {
             { value: 'nein', label: 'Nein' },
             { value: 'ja', label: 'Ja' },
           ],
+          section: 'Bebauungsdetails',
         },
       ],
     },
@@ -149,9 +157,9 @@ export default function PropertyEvaluationForm() {
       title: 'Gebäude und bauliche Anlagen',
       icon: <FaBuilding />,
       fields: [
-        { name: 'livingArea', label: 'Wohnfläche (m²)', type: 'number', required: true },
-        { name: 'rooms', label: 'Anzahl der Zimmer', type: 'number', required: true },
-        { name: 'floors', label: 'Anzahl der Vollgeschosse', type: 'number', required: true },
+        { name: 'livingArea', label: 'Wohnfläche (m²)', type: 'number', required: true, section: 'Gebäudedetails' },
+        { name: 'rooms', label: 'Anzahl der Zimmer', type: 'number', required: true, section: 'Gebäudedetails' },
+        { name: 'floors', label: 'Anzahl der Vollgeschosse', type: 'number', required: true, section: 'Gebäudedetails' },
         {
           name: 'basement',
           label: 'Unterkellert',
@@ -160,6 +168,7 @@ export default function PropertyEvaluationForm() {
             { value: 'ja', label: 'Ja' },
             { value: 'nein', label: 'Nein' },
           ],
+          section: 'Gebäudedetails',
         },
         {
           name: 'roofing',
@@ -170,6 +179,7 @@ export default function PropertyEvaluationForm() {
             { value: 'flachdach', label: 'Flachdach' },
             { value: 'walmdach', label: 'Walmdach' },
           ],
+          section: 'Gebäudedetails',
         },
         {
           name: 'garage',
@@ -180,8 +190,9 @@ export default function PropertyEvaluationForm() {
             { value: 'einzel', label: 'Einzelgarage' },
             { value: 'mehrfach', label: 'Mehrfachgarage' },
           ],
+          section: 'Zusätzliche Anlagen',
         },
-        { name: 'garageArea', label: 'Garagefläche (m²)', type: 'number' },
+        { name: 'garageArea', label: 'Garagefläche (m²)', type: 'number', section: 'Zusätzliche Anlagen' },
         {
           name: 'outdoorFacilities',
           label: 'Außenanlagen',
@@ -191,6 +202,7 @@ export default function PropertyEvaluationForm() {
             { value: 'balkon', label: 'Balkon' },
             { value: 'garten', label: 'Garten' },
           ],
+          section: 'Zusätzliche Anlagen',
         },
         {
           name: 'equipmentLevel',
@@ -201,6 +213,7 @@ export default function PropertyEvaluationForm() {
             { value: 'mittel', label: 'Mittel' },
             { value: 'gehoben', label: 'Gehoben' },
           ],
+          section: 'Ausstattung',
         },
         {
           name: 'heatingSystem',
@@ -211,6 +224,7 @@ export default function PropertyEvaluationForm() {
             { value: 'öl', label: 'Öl' },
             { value: 'wärmepumpe', label: 'Wärmepumpe' },
           ],
+          section: 'Ausstattung',
         },
         {
           name: 'sanitaryCondition',
@@ -221,6 +235,7 @@ export default function PropertyEvaluationForm() {
             { value: 'baujahrestypisch', label: 'Baujahrestypisch' },
             { value: 'renovierungsbedürftig', label: 'Renovierungsbedürftig' },
           ],
+          section: 'Ausstattung',
         },
       ],
     },
@@ -228,9 +243,9 @@ export default function PropertyEvaluationForm() {
       title: 'Modernisierungen und Zustand',
       icon: <FaTools />,
       fields: [
-        { name: 'lastModernization', label: 'Jahr der letzten Modernisierung', type: 'number' },
-        { name: 'modernizationDetails', label: 'Details zu Modernisierungen', type: 'textarea' },
-        { name: 'repairBacklog', label: 'Reparaturstau oder Baumängel', type: 'textarea' },
+        { name: 'lastModernization', label: 'Jahr der letzten Modernisierung', type: 'number', section: 'Modernisierungen' },
+        { name: 'modernizationDetails', label: 'Details zu Modernisierungen', type: 'textarea', section: 'Modernisierungen' },
+        { name: 'repairBacklog', label: 'Reparaturstau oder Baumängel', type: 'textarea', section: 'Zustand' },
         {
           name: 'accessibility',
           label: 'Barrierefrei',
@@ -239,6 +254,7 @@ export default function PropertyEvaluationForm() {
             { value: 'nein', label: 'Nein' },
             { value: 'ja', label: 'Ja' },
           ],
+          section: 'Zustand',
         },
         {
           name: 'energyCertificate',
@@ -248,24 +264,27 @@ export default function PropertyEvaluationForm() {
             { value: 'nein', label: 'Nein' },
             { value: 'ja', label: 'Ja' },
           ],
+          section: 'Energie',
         },
-        { name: 'energyClass', label: 'Energieeffizienzklasse (falls vorhanden)', type: 'text' },
+        { name: 'energyClass', label: 'Energieeffizienzklasse (falls vorhanden)', type: 'text', section: 'Energie' },
       ],
     },
     {
       title: 'Lage und Infrastruktur',
       icon: <FaMap />,
       fields: [
-        { name: 'localLocation', label: 'Beschreibung der lokalen Lage', type: 'textarea' },
+        { name: 'localLocation', label: 'Beschreibung der lokalen Lage', type: 'textarea', section: 'Lage' },
         {
           name: 'publicTransportDistance',
           label: 'Entfernung zu öffentlichen Verkehrsmitteln (km oder Minuten)',
           type: 'text',
+          section: 'Infrastruktur',
         },
         {
           name: 'amenitiesDistance',
           label: 'Entfernung zu Schulen, Geschäften, Freizeiteinrichtungen (km)',
           type: 'text',
+          section: 'Infrastruktur',
         },
       ],
     },
@@ -277,8 +296,9 @@ export default function PropertyEvaluationForm() {
           name: 'marketRent',
           label: 'Marktübliche Miete pro m² (€/m²/Monat, falls bekannt)',
           type: 'number',
+          section: 'Marktdaten',
         },
-        { name: 'capitalizationRate', label: 'Liegenschaftszinssatz (%, falls bekannt)', type: 'number' },
+        { name: 'capitalizationRate', label: 'Liegenschaftszinssatz (%, falls bekannt)', type: 'number', section: 'Marktdaten' },
       ],
     },
   ];
@@ -365,7 +385,7 @@ export default function PropertyEvaluationForm() {
   const renderField = (field) => {
     const hasError = fieldErrors[field.name];
     return (
-      <div className="relative">
+      <div className="relative w-52">
         {field.type === 'text' || field.type === 'number' ? (
           <motion.div
             className="relative"
@@ -377,22 +397,22 @@ export default function PropertyEvaluationForm() {
               name={field.name}
               value={formData[field.name]}
               onChange={handleChange}
-              className={`w-full p-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 bg-neutral shadow-input text-gray-800 placeholder-gray-400 text-base sm:text-lg ${
-                hasError ? 'border-red-500' : 'border-gray-200'
+              className={`w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-neutral text-gray-800 placeholder-gray-400 text-sm ${
+                hasError ? 'border-red-500' : 'border-gray-300'
               }`}
               placeholder={field.label}
               required={field.required}
             />
             {formData[field.name] && !hasError && (
-              <FaCheckCircle className="absolute right-4 top-1/2 transform -translate-y-1/2 text-green-500" />
+              <FaCheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" />
             )}
             {hasError && (
-              <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-red-500 text-sm">
+              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500 text-xs">
                 {hasError}
               </span>
             )}
             {field.tooltip && (
-              <div className="absolute right-12 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-help">
+              <div className="absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-help">
                 <span className="tooltip-text bg-gray-800 text-white text-xs rounded p-2 absolute z-10 hidden group-hover:block -top-10 right-0">
                   {field.tooltip}
                 </span>
@@ -405,8 +425,8 @@ export default function PropertyEvaluationForm() {
             name={field.name}
             value={formData[field.name]}
             onChange={handleChange}
-            className={`w-full p-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 bg-neutral shadow-input text-gray-800 text-base sm:text-lg ${
-              hasError ? 'border-red-500' : 'border-gray-200'
+            className={`w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-neutral text-gray-800 text-sm ${
+              hasError ? 'border-red-500' : 'border-gray-300'
             }`}
             whileHover={{ scale: 1.02 }}
           >
@@ -421,15 +441,15 @@ export default function PropertyEvaluationForm() {
             name={field.name}
             value={formData[field.name]}
             onChange={handleChange}
-            className={`w-full p-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 bg-neutral shadow-input text-gray-800 placeholder-gray-400 text-base sm:text-lg ${
-              hasError ? 'border-red-500' : 'border-gray-200'
+            className={`w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-neutral text-gray-800 placeholder-gray-400 text-sm ${
+              hasError ? 'border-red-500' : 'border-gray-300'
             }`}
             rows="4"
             placeholder={field.label}
             whileHover={{ scale: 1.02 }}
           />
         ) : field.type === 'checkbox' ? (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {field.options.map((option) => (
               <motion.label
                 key={option.value}
@@ -444,7 +464,7 @@ export default function PropertyEvaluationForm() {
                   onChange={handleChange}
                   className="h-5 w-5 text-primary focus:ring-primary border-gray-300 rounded"
                 />
-                <span className="ml-3 text-base text-gray-700">{option.label}</span>
+                <span className="ml-2 text-sm text-gray-700">{option.label}</span>
               </motion.label>
             ))}
           </div>
@@ -454,178 +474,170 @@ export default function PropertyEvaluationForm() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 font-inter">
-      <motion.div
-        className="max-w-5xl w-full bg-neutral shadow-card rounded-2xl overflow-hidden"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, ease: 'easeOut' }}
-      >
+    <div className="min-h-screen bg-background flex flex-col items-center justify-between py-16 px-4 sm:px-6 lg:px-8 font-roboto">
+      <div className="max-w-5xl w-full">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-800 to-blue-600 p-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <FaHome className="text-secondary text-4xl sm:text-5xl" />
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">
-              Stilvoll Immobilien
-            </h2>
-          </div>
-          <div className="text-white text-sm sm:text-base">
-            Immobilienbewertung
+        <div className="flex items-center justify-center mb-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-primary">Stilvoll Immobilien</h2>
+            <p className="text-lg text-gray-600">Immobilienbewertung</p>
           </div>
         </div>
 
-        {/* Hauptinhalt */}
-        <div className="p-8 sm:p-12">
-          {/* Fortschrittsanzeige (Inhaltsverzeichnis als Kacheln) */}
-          <div className="mb-12">
-            <div className="flex flex-wrap justify-center gap-4 mb-6">
-              {steps.map((step, index) => (
-                <motion.div
-                  key={index}
-                  onClick={() => handleStepClick(index)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer shadow-sm transition-all duration-300 ${
-                    index <= currentStep
-                      ? isStepCompleted(index)
-                        ? 'bg-green-500 text-white'
-                        : 'bg-primary text-white'
-                      : 'bg-gray-200 text-gray-600 cursor-not-allowed'
-                  }`}
-                  whileHover={{ scale: index <= currentStep || isStepCompleted(currentStep) ? 1.05 : 1 }}
-                >
-                  {step.icon}
-                  <span className="text-sm font-medium">{step.title}</span>
-                  {isStepCompleted(index) && index < currentStep && (
-                    <FaCheckCircle className="text-white" />
-                  )}
-                </motion.div>
-              ))}
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
+        {/* Fortschrittsanzeige (Inhaltsverzeichnis als Kacheln) */}
+        <div className="mb-12">
+          <div className="flex flex-wrap justify-center gap-4 mb-6">
+            {steps.map((step, index) => (
               <motion.div
-                className="bg-gradient-to-r from-blue-800 to-blue-600 h-3 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-                transition={{ duration: 0.8, ease: 'easeInOut' }}
-              />
-            </div>
-            <div className="text-center mt-2 text-sm text-gray-600">
-              Fortschritt: {Math.round(((currentStep + 1) / steps.length) * 100)}%
-            </div>
+                key={index}
+                onClick={() => handleStepClick(index)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer shadow-sm transition-all duration-300 ${
+                  index <= currentStep
+                    ? isStepCompleted(index)
+                      ? 'bg-green-500 text-white'
+                      : 'bg-primary text-white'
+                    : 'bg-gray-200 text-gray-600 cursor-not-allowed'
+                }`}
+                whileHover={{ scale: index <= currentStep || isStepCompleted(currentStep) ? 1.05 : 1 }}
+              >
+                {step.icon}
+                <span className="text-sm font-medium">{step.title}</span>
+                {isStepCompleted(index) && index < currentStep && (
+                  <FaCheckCircle className="text-white" />
+                )}
+              </motion.div>
+            ))}
           </div>
-
-          <AnimatePresence mode="wait">
-            {currentStep < steps.length ? (
-              <motion.form
-                key={currentStep}
-                initial={{ opacity: 0, x: 100 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ duration: 0.8, ease: 'easeInOut' }}
-                onSubmit={currentStep === steps.length - 1 ? handleSubmit : (e) => e.preventDefault()}
-                className="space-y-10"
-              >
-                <h3 className="text-2xl sm:text-3xl font-semibold text-blue-800 flex items-center gap-3">
-                  {steps[currentStep].icon} {steps[currentStep].title}
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {steps[currentStep].fields.map((field) => (
-                    <motion.div
-                      key={field.name}
-                      className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 group"
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.2 }}
-                    >
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-3">
-                        {field.label}
-                        {field.required && <span className="text-red-500">*</span>}
-                      </label>
-                      {renderField(field)}
-                    </motion.div>
-                  ))}
-                </div>
-                <div className="flex justify-between mt-12">
-                  {currentStep > 0 && (
-                    <motion.button
-                      type="button"
-                      onClick={prevStep}
-                      className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-300 shadow-sm text-sm sm:text-base"
-                      whileHover={{ scale: 1.05, backgroundColor: '#D1D5DB' }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      Zurück
-                    </motion.button>
-                  )}
-                  <motion.button
-                    type={currentStep === steps.length - 1 ? 'submit' : 'button'}
-                    onClick={currentStep < steps.length - 1 ? nextStep : undefined}
-                    className="px-6 py-3 bg-blue-800 text-white rounded-xl hover:bg-blue-900 transition-all duration-300 shadow-sm text-sm sm:text-base flex items-center justify-center"
-                    whileHover={{ scale: 1.05, backgroundColor: '#1E3A8A' }}
-                    whileTap={{ scale: 0.95 }}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                      </svg>
-                    ) : null}
-                    {currentStep === steps.length - 1 ? 'Bewertung anfordern' : 'Weiter'}
-                  </motion.button>
-                </div>
-              </motion.form>
-            ) : (
-              response && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.8, ease: 'easeOut' }}
-                  className="text-center"
-                >
-                  <h3 className="text-2xl sm:text-3xl font-semibold text-blue-800 mb-6 flex items-center justify-center gap-3">
-                    <FaChartLine className="text-secondary" /> Ihre Bewertung
-                  </h3>
-                  <div className="bg-accent p-8 rounded-xl space-y-6 shadow-card">
-                    <p className="text-lg sm:text-xl">
-                      <strong className="text-blue-800">Geschätzter Verkehrswert:</strong>{' '}
-                      <span className="text-secondary font-bold">{response.price}</span>
-                    </p>
-                    <p className="text-lg sm:text-xl">
-                      <strong className="text-blue-800">Lagebewertung:</strong> {response.location}
-                    </p>
-                    <p className="text-lg sm:text-xl">
-                      <strong className="text-blue-800">Zustand:</strong> {response.condition}
-                    </p>
-                  </div>
-                  <motion.button
-                    onClick={() => setCurrentStep(0)}
-                    className="mt-8 px-6 py-3 bg-blue-800 text-white rounded-xl hover:bg-blue-900 transition-all duration-300 shadow-sm text-sm sm:text-base"
-                    whileHover={{ scale: 1.05, backgroundColor: '#1E3A8A' }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Neue Bewertung starten
-                  </motion.button>
-                </motion.div>
-              )
-            )}
-          </AnimatePresence>
-          {error && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-6 text-red-600 text-center text-sm sm:text-base"
-            >
-              {error}
-              <button
-                onClick={() => setCurrentStep(0)}
-                className="ml-2 text-blue-800 underline hover:text-blue-900"
-              >
-                Zurück zum Anfang
-              </button>
-            </motion.p>
-          )}
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <motion.div
+              className="bg-primary h-3 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+              transition={{ duration: 0.8, ease: 'easeInOut' }}
+            />
+          </div>
+          <div className="text-center mt-2 text-sm text-gray-600">
+            Fortschritt: {Math.round(((currentStep + 1) / steps.length) * 100)}%
+          </div>
         </div>
-      </motion.div>
+
+        <AnimatePresence mode="wait">
+          {currentStep < steps.length ? (
+            <motion.form
+              key={currentStep}
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ duration: 0.8, ease: 'easeInOut' }}
+              onSubmit={currentStep === steps.length - 1 ? handleSubmit : (e) => e.preventDefault()}
+              className="space-y-10"
+            >
+              <h3 className="text-lg font-bold text-primary flex items-center gap-2">
+                {steps[currentStep].icon} {steps[currentStep].title}
+              </h3>
+              <div className="space-y-8">
+                {[...new Set(steps[currentStep].fields.map((field) => field.section))].map((section) => (
+                  <div key={section} className="space-y-5">
+                    <h4 className="text-base font-semibold text-gray-700">{section}</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      {steps[currentStep].fields
+                        .filter((field) => field.section === section)
+                        .map((field) => (
+                          <div key={field.name}>
+                            {renderField(field)}
+                          </div>
+                        ))}
+                    </div>
+                    <hr className="border-t border-gray-300" />
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between mt-12">
+                {currentStep > 0 && (
+                  <motion.button
+                    type="button"
+                    onClick={prevStep}
+                    className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-300 shadow-sm text-sm"
+                    whileHover={{ scale: 1.05, backgroundColor: '#D1D5DB' }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Zurück
+                  </motion.button>
+                )}
+                <motion.button
+                  type={currentStep === steps.length - 1 ? 'submit' : 'button'}
+                  onClick={currentStep < steps.length - 1 ? nextStep : undefined}
+                  className="px-6 py-3 bg-primary text-white rounded-xl hover:bg-blue-900 transition-all duration-300 shadow-sm text-sm flex items-center justify-center"
+                  whileHover={{ scale: 1.05, backgroundColor: '#1E3A8A' }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                  ) : null}
+                  {currentStep === steps.length - 1 ? 'Bewertung anfordern' : 'Weiter'}
+                </motion.button>
+              </div>
+            </motion.form>
+          ) : (
+            response && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                className="text-center"
+              >
+                <h3 className="text-lg font-bold text-primary mb-6 flex items-center justify-center gap-2">
+                  <FaChartLine className="text-secondary" /> Ihre Bewertung
+                </h3>
+                <div className="bg-neutral p-8 rounded-xl space-y-6 shadow-card">
+                  <p className="text-base">
+                    <strong className="text-primary">Geschätzter Verkehrswert:</strong>{' '}
+                    <span className="text-secondary font-bold">{response.price}</span>
+                  </p>
+                  <p className="text-base">
+                    <strong className="text-primary">Lagebewertung:</strong> {response.location}
+                  </p>
+                  <p className="text-base">
+                    <strong className="text-primary">Zustand:</strong> {response.condition}
+                  </p>
+                </div>
+                <motion.button
+                  onClick={() => setCurrentStep(0)}
+                  className="mt-8 px-6 py-3 bg-primary text-white rounded-xl hover:bg-blue-900 transition-all duration-300 shadow-sm text-sm"
+                  whileHover={{ scale: 1.05, backgroundColor: '#1E3A8A' }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Neue Bewertung starten
+                </motion.button>
+              </motion.div>
+            )
+          )}
+        </AnimatePresence>
+        {error && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-6 text-red-600 text-center text-sm"
+          >
+            {error}
+            <button
+              onClick={() => setCurrentStep(0)}
+              className="ml-2 text-primary underline hover:text-blue-900"
+            >
+              Zurück zum Anfang
+            </button>
+          </motion.p>
+        )}
+      </div>
+
+      {/* Footer */}
+      <footer className="mt-12 text-center text-xs text-gray-600">
+        Stilvoll Immobilien | info@stilvoll.de | +49 123 456789
+      </footer>
     </div>
   );
 }
