@@ -1,50 +1,58 @@
 // components/PropertyEvaluationForm.js
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaHome, FaLandmark, FaBuilding, FaTools, FaMap, FaChartLine, FaCheckCircle } from 'react-icons/fa';
 
 export default function PropertyEvaluationForm() {
-  const [formData, setFormData] = useState({
-    address: '',
-    city: '',
-    zipCode: '',
-    propertyType: 'einfamilienhaus',
-    constructionYear: '',
-    evaluationPurpose: 'verkauf',
-    plotSize: '',
-    soilValue: '',
-    developmentStatus: 'vollständig',
-    soilCondition: 'normal',
-    zoningPlan: 'wohngebiet',
-    encumbrances: 'nein',
-    floodRisk: 'nein',
-    livingArea: '',
-    rooms: '',
-    floors: '',
-    basement: 'ja',
-    roofing: 'satteldach',
-    garage: 'nein',
-    garageArea: '',
-    outdoorFacilities: [],
-    equipmentLevel: 'mittel',
-    heatingSystem: 'gas',
-    sanitaryCondition: 'baujahrestypisch',
-    lastModernization: '',
-    modernizationDetails: '',
-    repairBacklog: '',
-    accessibility: 'nein',
-    energyCertificate: 'nein',
-    energyClass: '',
-    localLocation: '',
-    publicTransportDistance: '',
-    amenitiesDistance: '',
-    marketRent: '',
-    capitalizationRate: '',
+  const [formData, setFormData] = useState(() => {
+    const savedData = typeof window !== 'undefined' ? localStorage.getItem('formData') : null;
+    return savedData ? JSON.parse(savedData) : {
+      address: '',
+      city: '',
+      zipCode: '',
+      propertyType: 'einfamilienhaus',
+      constructionYear: '',
+      evaluationPurpose: 'verkauf',
+      plotSize: '',
+      soilValue: '',
+      developmentStatus: 'vollständig',
+      soilCondition: 'normal',
+      zoningPlan: 'wohngebiet',
+      encumbrances: 'nein',
+      floodRisk: 'nein',
+      livingArea: '',
+      rooms: '',
+      floors: '',
+      basement: 'ja',
+      roofing: 'satteldach',
+      garage: 'nein',
+      garageArea: '',
+      outdoorFacilities: [],
+      equipmentLevel: 'mittel',
+      heatingSystem: 'gas',
+      sanitaryCondition: 'baujahrestypisch',
+      lastModernization: '',
+      modernizationDetails: '',
+      repairBacklog: '',
+      accessibility: 'nein',
+      energyCertificate: 'nein',
+      energyClass: '',
+      localLocation: '',
+      publicTransportDistance: '',
+      amenitiesDistance: '',
+      marketRent: '',
+      capitalizationRate: '',
+    };
   });
   const [currentStep, setCurrentStep] = useState(0);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('formData', JSON.stringify(formData));
+  }, [formData]);
 
   const steps = [
     {
@@ -307,6 +315,7 @@ export default function PropertyEvaluationForm() {
     e.preventDefault();
     if (!validateStep()) return;
 
+    setIsLoading(true);
     setError(null);
     setResponse(null);
 
@@ -319,12 +328,15 @@ export default function PropertyEvaluationForm() {
       const data = await res.json();
       if (res.ok) {
         setResponse(data.evaluation);
-        setCurrentStep(steps.length); // Zeige Ergebnis
+        setCurrentStep(steps.length);
+        localStorage.removeItem('formData'); // Clear saved data on successful submission
       } else {
         setError(data.error || 'Fehler bei der Bewertung');
       }
     } catch (err) {
       setError('Netzwerkfehler. Bitte versuche es erneut.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -355,22 +367,22 @@ export default function PropertyEvaluationForm() {
               name={field.name}
               value={formData[field.name]}
               onChange={handleChange}
-              className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 bg-neutral shadow-input text-gray-800 placeholder-gray-400 ${
+              className={`w-full p-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 bg-neutral shadow-input text-gray-800 placeholder-gray-400 text-base sm:text-lg ${
                 hasError ? 'border-red-500' : 'border-gray-200'
               }`}
               placeholder={field.label}
               required={field.required}
             />
             {formData[field.name] && !hasError && (
-              <FaCheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" />
+              <FaCheckCircle className="absolute right-4 top-1/2 transform -translate-y-1/2 text-green-500" />
             )}
             {hasError && (
-              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500 text-sm">
+              <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-red-500 text-sm">
                 {hasError}
               </span>
             )}
             {field.tooltip && (
-              <div className="absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-help">
+              <div className="absolute right-12 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-help">
                 <span className="tooltip-text bg-gray-800 text-white text-xs rounded p-2 absolute z-10 hidden group-hover:block -top-10 right-0">
                   {field.tooltip}
                 </span>
@@ -383,7 +395,7 @@ export default function PropertyEvaluationForm() {
             name={field.name}
             value={formData[field.name]}
             onChange={handleChange}
-            className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 bg-neutral shadow-input text-gray-800 ${
+            className={`w-full p-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 bg-neutral shadow-input text-gray-800 text-base sm:text-lg ${
               hasError ? 'border-red-500' : 'border-gray-200'
             }`}
             whileHover={{ scale: 1.02 }}
@@ -399,7 +411,7 @@ export default function PropertyEvaluationForm() {
             name={field.name}
             value={formData[field.name]}
             onChange={handleChange}
-            className={`w-full p-3 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 bg-neutral shadow-input text-gray-800 placeholder-gray-400 ${
+            className={`w-full p-4 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 bg-neutral shadow-input text-gray-800 placeholder-gray-400 text-base sm:text-lg ${
               hasError ? 'border-red-500' : 'border-gray-200'
             }`}
             rows="4"
@@ -420,9 +432,9 @@ export default function PropertyEvaluationForm() {
                   value={option.value}
                   checked={formData[field.name].includes(option.value)}
                   onChange={handleChange}
-                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                  className="h-5 w-5 text-primary focus:ring-primary border-gray-300 rounded"
                 />
-                <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+                <span className="ml-3 text-base text-gray-700">{option.label}</span>
               </motion.label>
             ))}
           </div>
@@ -434,151 +446,179 @@ export default function PropertyEvaluationForm() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 font-inter">
       <motion.div
-        className="max-w-4xl w-full bg-neutral shadow-card rounded-2xl p-10"
+        className="max-w-4xl w-full bg-neutral shadow-card rounded-2xl overflow-hidden"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
       >
-        <h2 className="text-4xl font-bold text-primary mb-8 text-center flex items-center justify-center gap-3">
-          <FaHome className="text-secondary text-4xl" /> Immobilienbewertung – Stilvoll Immobilien
-        </h2>
-
-        {/* Fortschrittsanzeige */}
-        <div className="mb-10">
-          <div className="flex justify-between mb-4">
-            {steps.map((step, index) => (
-              <div
-                key={index}
-                className={`flex-1 text-center text-sm font-medium flex flex-col items-center ${
-                  index <= currentStep ? 'text-primary' : 'text-gray-400'
-                }`}
-              >
-                <motion.div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 border-2 ${
-                    index <= currentStep
-                      ? 'bg-primary text-white border-primary'
-                      : 'bg-neutral text-gray-600 border-gray-200'
-                  }`}
-                  animate={{
-                    scale: index === currentStep ? 1.2 : 1,
-                    rotate: index <= currentStep ? 360 : 0,
-                  }}
-                  transition={{ duration: 0.6, ease: 'easeInOut' }}
-                >
-                  {step.icon}
-                </motion.div>
-                <span className="text-xs sm:text-sm">{step.title}</span>
-              </div>
-            ))}
+        {/* Header */}
+        <div className="bg-gradient-to-r from-primary to-blue-900 p-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <FaHome className="text-secondary text-4xl sm:text-5xl" />
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">
+              Stilvoll Immobilien
+            </h2>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <motion.div
-              className="bg-primary h-2 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-              transition={{ duration: 0.6, ease: 'easeInOut' }}
-            />
+          <div className="text-white text-sm sm:text-base">
+            Immobilienbewertung
           </div>
         </div>
 
-        <AnimatePresence mode="wait">
-          {currentStep < steps.length ? (
-            <motion.form
-              key={currentStep}
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100 }}
-              transition={{ duration: 0.6, ease: 'easeInOut' }}
-              onSubmit={currentStep === steps.length - 1 ? handleSubmit : (e) => e.preventDefault()}
-              className="space-y-8"
-            >
-              <h3 className="text-2xl font-semibold text-primary flex items-center gap-3">
-                {steps[currentStep].icon} {steps[currentStep].title}
-              </h3>
-              <div className="space-y-6">
-                {steps[currentStep].fields.map((field) => (
+        {/* Hauptinhalt */}
+        <div className="p-8 sm:p-10">
+          {/* Fortschrittsanzeige */}
+          <div className="mb-10">
+            <div className="flex justify-between mb-4">
+              {steps.map((step, index) => (
+                <div
+                  key={index}
+                  className={`flex-1 text-center text-sm font-medium flex flex-col items-center ${
+                    index <= currentStep ? 'text-primary' : 'text-gray-400'
+                  }`}
+                >
                   <motion.div
-                    key={field.name}
-                    className="bg-neutral p-5 rounded-xl shadow-card border border-gray-100 group"
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.1 }}
+                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 border-2 ${
+                      index <= currentStep
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-neutral text-gray-600 border-gray-200'
+                    }`}
+                    animate={{
+                      scale: index === currentStep ? 1.2 : 1,
+                      rotate: index <= currentStep ? 360 : 0,
+                    }}
+                    transition={{ duration: 0.6, ease: 'easeInOut' }}
                   >
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {field.label}
-                      {field.required && <span className="text-red-500">*</span>}
-                    </label>
-                    {renderField(field)}
+                    {step.icon}
                   </motion.div>
-                ))}
-              </div>
-              <div className="flex justify-between mt-10">
-                {currentStep > 0 && (
+                  <span className="text-xs sm:text-sm">{step.title}</span>
+                </div>
+              ))}
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <motion.div
+                className="bg-gradient-to-r from-primary to-blue-900 h-2 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+                transition={{ duration: 0.6, ease: 'easeInOut' }}
+              />
+            </div>
+            <div className="text-center mt-2 text-sm text-gray-600">
+              Fortschritt: {Math.round(((currentStep + 1) / steps.length) * 100)}%
+            </div>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {currentStep < steps.length ? (
+              <motion.form
+                key={currentStep}
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={{ duration: 0.6, ease: 'easeInOut' }}
+                onSubmit={currentStep === steps.length - 1 ? handleSubmit : (e) => e.preventDefault()}
+                className="space-y-8"
+              >
+                <h3 className="text-2xl sm:text-3xl font-semibold text-primary flex items-center gap-3">
+                  {steps[currentStep].icon} {steps[currentStep].title}
+                </h3>
+                <div className="space-y-6">
+                  {steps[currentStep].fields.map((field) => (
+                    <motion.div
+                      key={field.name}
+                      className="bg-neutral p-5 rounded-xl shadow-card border border-gray-100 group"
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 0.1 }}
+                    >
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+                        {field.label}
+                        {field.required && <span className="text-red-500">*</span>}
+                      </label>
+                      {renderField(field)}
+                    </motion.div>
+                  ))}
+                </div>
+                <div className="flex justify-between mt-10">
+                  {currentStep > 0 && (
+                    <motion.button
+                      type="button"
+                      onClick={prevStep}
+                      className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-300 shadow-sm text-sm sm:text-base"
+                      whileHover={{ scale: 1.05, backgroundColor: '#D1D5DB' }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Zurück
+                    </motion.button>
+                  )}
                   <motion.button
-                    type="button"
-                    onClick={prevStep}
-                    className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-300 shadow-sm text-sm sm:text-base"
-                    whileHover={{ scale: 1.05, backgroundColor: '#D1D5DB' }}
+                    type={currentStep === steps.length - 1 ? 'submit' : 'button'}
+                    onClick={currentStep < steps.length - 1 ? nextStep : undefined}
+                    className="px-6 py-3 bg-primary text-white rounded-xl hover:bg-blue-900 transition-all duration-300 shadow-sm text-sm sm:text-base flex items-center justify-center"
+                    whileHover={{ scale: 1.05, backgroundColor: '#00205B' }}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                      </svg>
+                    ) : null}
+                    {currentStep === steps.length - 1 ? 'Bewertung anfordern' : 'Weiter'}
+                  </motion.button>
+                </div>
+              </motion.form>
+            ) : (
+              response && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
+                  className="text-center"
+                >
+                  <h3 className="text-2xl sm:text-3xl font-semibold text-primary mb-6 flex items-center justify-center gap-3">
+                    <FaChartLine className="text-secondary" /> Ihre Bewertung
+                  </h3>
+                  <div className="bg-accent p-8 rounded-xl space-y-6 shadow-card">
+                    <p className="text-lg sm:text-xl">
+                      <strong className="text-primary">Geschätzter Verkehrswert:</strong>{' '}
+                      <span className="text-secondary font-bold">{response.price}</span>
+                    </p>
+                    <p className="text-lg sm:text-xl">
+                      <strong className="text-primary">Lagebewertung:</strong> {response.location}
+                    </p>
+                    <p className="text-lg sm:text-xl">
+                      <strong className="text-primary">Zustand:</strong> {response.condition}
+                    </p>
+                  </div>
+                  <motion.button
+                    onClick={() => setCurrentStep(0)}
+                    className="mt-8 px-6 py-3 bg-primary text-white rounded-xl hover:bg-blue-900 transition-all duration-300 shadow-sm text-sm sm:text-base"
+                    whileHover={{ scale: 1.05, backgroundColor: '#00205B' }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Zurück
+                    Neue Bewertung starten
                   </motion.button>
-                )}
-                <motion.button
-                  type={currentStep === steps.length - 1 ? 'submit' : 'button'}
-                  onClick={currentStep < steps.length - 1 ? nextStep : undefined}
-                  className="px-6 py-3 bg-primary text-white rounded-xl hover:bg-blue-900 transition-all duration-300 shadow-sm text-sm sm:text-base"
-                  whileHover={{ scale: 1.05, backgroundColor: '#00205B' }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {currentStep === steps.length - 1 ? 'Bewertung anfordern' : 'Weiter'}
-                </motion.button>
-              </div>
-            </motion.form>
-          ) : (
-            response && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
-                className="text-center"
+                </motion.div>
+              )
+            )}
+          </AnimatePresence>
+          {error && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-6 text-red-600 text-center text-sm sm:text-base"
+            >
+              {error}
+              <button
+                onClick={() => setCurrentStep(0)}
+                className="ml-2 text-primary underline hover:text-blue-900"
               >
-                <h3 className="text-2xl font-semibold text-primary mb-6 flex items-center justify-center gap-3">
-                  <FaChartLine className="text-secondary" /> Ihre Bewertung
-                </h3>
-                <div className="bg-accent p-8 rounded-xl space-y-6 shadow-card">
-                  <p className="text-lg sm:text-xl">
-                    <strong className="text-primary">Geschätzter Verkehrswert:</strong>{' '}
-                    <span className="text-secondary font-bold">{response.price}</span>
-                  </p>
-                  <p className="text-lg sm:text-xl">
-                    <strong className="text-primary">Lagebewertung:</strong> {response.location}
-                  </p>
-                  <p className="text-lg sm:text-xl">
-                    <strong className="text-primary">Zustand:</strong> {response.condition}
-                  </p>
-                </div>
-                <motion.button
-                  onClick={() => setCurrentStep(0)}
-                  className="mt-8 px-6 py-3 bg-primary text-white rounded-xl hover:bg-blue-900 transition-all duration-300 shadow-sm text-sm sm:text-base"
-                  whileHover={{ scale: 1.05, backgroundColor: '#00205B' }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Neue Bewertung starten
-                </motion.button>
-              </motion.div>
-            )
+                Zurück zum Anfang
+              </button>
+            </motion.p>
           )}
-        </AnimatePresence>
-        {error && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mt-6 text-red-600 text-center text-sm sm:text-base"
-          >
-            {error}
-          </motion.p>
-        )}
+        </div>
       </motion.div>
     </div>
   );
