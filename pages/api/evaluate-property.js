@@ -1,6 +1,4 @@
 // pages/api/evaluate-property.js
-import fs from 'fs';
-import path from 'path';
 const sgMail = require('@sendgrid/mail');
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -47,66 +45,65 @@ export default async function handler(req, res) {
     capitalizationRate,
   } = req.body;
 
-  // Validierung
-  if (!address || !city || !zipCode || !livingArea || !rooms || !floors || !plotSize) {
-    return res.status(400).json({ error: 'Pflichtfelder fehlen' });
-  }
-
-  // Daten für Bewertung formatieren
-  const propertyData = {
-    address,
-    city,
-    zipCode,
-    propertyType,
-    constructionYear: parseInt(constructionYear) || 2000,
-    plotSize: parseInt(plotSize) || 0,
-    soilValue: parseFloat(soilValue) || 370,
-    developmentStatus,
-    soilCondition,
-    zoningPlan,
-    encumbrances,
-    floodRisk,
-    livingArea: parseInt(livingArea) || 0,
-    rooms: parseInt(rooms) || 0,
-    floors: parseInt(floors) || 0,
-    basement,
-    roofing,
-    garage,
-    garageArea: parseInt(garageArea) || 0,
-    outdoorFacilities,
-    equipmentLevel,
-    heatingSystem,
-    sanitaryCondition,
-    lastModernization: parseInt(lastModernization) || null,
-    modernizationDetails,
-    repairBacklog,
-    accessibility,
-    energyCertificate,
-    energyClass,
-    localLocation,
-    publicTransportDistance,
-    amenitiesDistance,
-    marketRent: parseFloat(marketRent) || 12,
-    capitalizationRate: parseFloat(capitalizationRate) || 2.8,
-  };
-
   try {
-    // Daten speichern (z. B. in einer Datei)
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filePath = path.join(process.cwd(), 'data', `submission-${timestamp}.json`);
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, JSON.stringify(propertyData, null, 2));
+    // Validierung
+    if (!address || !city || !zipCode || !livingArea || !rooms || !floors || !plotSize) {
+      return res.status(400).json({ error: 'Pflichtfelder fehlen' });
+    }
 
-    // E-Mail senden
-    const msg = {
-      to: 'info@konzept-stilvoll.de',
-      from: 'info@stilvoll-immobilien.com', // Ersetze dies mit deiner verifizierten E-Mail-Adresse
-      subject: 'Neue Immobilienbewertung',
-      text: `Eine neue Bewertung wurde eingereicht:\n\n${JSON.stringify(propertyData, null, 2)}`,
+    // Daten für Bewertung formatieren mit sicherer Typkonvertierung
+    const propertyData = {
+      address,
+      city,
+      zipCode,
+      propertyType,
+      constructionYear: parseInt(constructionYear, 10) || 2000,
+      plotSize: parseInt(plotSize, 10) || 0,
+      soilValue: parseFloat(soilValue) || 370,
+      developmentStatus,
+      soilCondition,
+      zoningPlan,
+      encumbrances,
+      floodRisk,
+      livingArea: parseInt(livingArea, 10) || 0,
+      rooms: parseInt(rooms, 10) || 0,
+      floors: parseInt(floors, 10) || 0,
+      basement,
+      roofing,
+      garage,
+      garageArea: parseInt(garageArea, 10) || 0,
+      outdoorFacilities: Array.isArray(outdoorFacilities) ? outdoorFacilities : [],
+      equipmentLevel,
+      heatingSystem,
+      sanitaryCondition,
+      lastModernization: parseInt(lastModernization, 10) || null,
+      modernizationDetails,
+      repairBacklog,
+      accessibility,
+      energyCertificate,
+      energyClass,
+      localLocation,
+      publicTransportDistance,
+      amenitiesDistance,
+      marketRent: parseFloat(marketRent) || 12,
+      capitalizationRate: parseFloat(capitalizationRate) || 2.8,
     };
 
-    await sgMail.send(msg);
-    console.log('E-Mail erfolgreich gesendet an info@konzept-stilvoll.de');
+    // E-Mail senden
+    try {
+      const msg = {
+        to: 'info@konzept-stilvoll.de',
+        from: 'DEINE_VERIFIZIERTE_EMAIL@DOMAIN.COM', // Ersetze dies mit deiner verifizierten E-Mail-Adresse
+        subject: 'Neue Immobilienbewertung',
+        text: `Eine neue Bewertung wurde eingereicht:\n\n${JSON.stringify(propertyData, null, 2)}`,
+      };
+
+      await sgMail.send(msg);
+      console.log('E-Mail erfolgreich gesendet an info@konzept-stilvoll.de');
+    } catch (emailError) {
+      console.error('Fehler beim Senden der E-Mail:', emailError.message);
+      return res.status(500).json({ error: 'Fehler beim Senden der E-Mail: ' + emailError.message });
+    }
 
     // Sachwertverfahren (primäres Verfahren)
     const Bodenwert = propertyData.plotSize * propertyData.soilValue;
@@ -172,6 +169,6 @@ export default async function handler(req, res) {
     res.status(200).json({ evaluation });
   } catch (error) {
     console.error('Fehler:', error.message);
-    res.status(500).json({ error: 'Fehler bei der Bewertung oder beim Senden der E-Mail' });
+    res.status(500).json({ error: 'Fehler bei der Bewertung: ' + error.message });
   }
 }
