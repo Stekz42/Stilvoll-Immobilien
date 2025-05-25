@@ -1,12 +1,17 @@
 // components/PropertyEvaluationForm.js
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaHome, FaLandmark, FaBuilding, FaTools, FaMap, FaChartLine, FaCheckCircle, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaHome, FaLandmark, FaBuilding, FaTools, FaMap, FaChartLine, FaCheckCircle, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
 
 export default function PropertyEvaluationForm() {
   const [formData, setFormData] = useState(() => {
     const savedData = typeof window !== 'undefined' ? localStorage.getItem('formData') : null;
     return savedData ? JSON.parse(savedData) : {
+      firstName: '',
+      lastName: '',
+      addressPersonal: '',
+      phone: '',
+      email: '',
       address: '',
       city: '',
       zipCode: '',
@@ -55,6 +60,17 @@ export default function PropertyEvaluationForm() {
   }, [formData]);
 
   const steps = [
+    {
+      title: 'Persönliche Daten',
+      icon: <FaUser />,
+      fields: [
+        { name: 'firstName', label: 'Vorname', type: 'text', required: true, section: 'Persönliche Daten', description: 'Geben Sie Ihren Vornamen ein (z. B. Max).' },
+        { name: 'lastName', label: 'Nachname', type: 'text', required: true, section: 'Persönliche Daten', description: 'Geben Sie Ihren Nachnamen ein (z. B. Mustermann).' },
+        { name: 'addressPersonal', label: 'Anschrift (Straße, Hausnummer, PLZ, Ort)', type: 'text', required: true, section: 'Persönliche Daten', description: 'Geben Sie Ihre vollständige Anschrift ein (z. B. Hauptstraße 10, 40210 Düsseldorf).' },
+        { name: 'phone', label: 'Telefonnummer', type: 'text', required: true, section: 'Persönliche Daten', description: 'Geben Sie Ihre Telefonnummer ein (z. B. +49123456789).' },
+        { name: 'email', label: 'E-Mail-Adresse', type: 'email', required: true, section: 'Persönliche Daten', description: 'Geben Sie Ihre E-Mail-Adresse ein (z. B. max.mustermann@example.com).' },
+      ],
+    },
     {
       title: 'Allgemeine Informationen',
       icon: <FaHome />,
@@ -353,9 +369,17 @@ export default function PropertyEvaluationForm() {
   const downloadFormDataAsText = () => {
     // Formulardaten formatieren
     let textContent = '=== Immobilienbewertung ===\n\n';
-    textContent += 'Eingegebene Daten:\n';
+    textContent += 'Persönliche Daten:\n';
+    textContent += `Vorname: ${formData.firstName}\n`;
+    textContent += `Nachname: ${formData.lastName}\n`;
+    textContent += `Anschrift: ${formData.addressPersonal}\n`;
+    textContent += `Telefonnummer: ${formData.phone}\n`;
+    textContent += `E-Mail-Adresse: ${formData.email}\n`;
+    textContent += '\nEingegebene Daten:\n';
     for (const [key, value] of Object.entries(formData)) {
-      textContent += `${key}: ${Array.isArray(value) ? value.join(', ') : value}\n`;
+      if (!['firstName', 'lastName', 'addressPersonal', 'phone', 'email'].includes(key)) {
+        textContent += `${key}: ${Array.isArray(value) ? value.join(', ') : value}\n`;
+      }
     }
 
     // Auswertung hinzufügen, falls vorhanden
@@ -450,7 +474,7 @@ export default function PropertyEvaluationForm() {
     const hasError = fieldErrors[field.name];
     return (
       <div className="position-relative w-100">
-        {field.type === 'text' || field.type === 'number' ? (
+        {field.type === 'text' || field.type === 'number' || field.type === 'email' ? (
           <motion.div
             className="position-relative"
             whileHover={{ scale: 1.02 }}
@@ -754,7 +778,9 @@ export default function PropertyEvaluationForm() {
                           </tr>
                           <tr>
                             <td>Marktanpassung</td>
-                            <td>+{response.breakdown.Marktanpassung} €</td>
+                            <td className={parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? 'text-success' : 'text-danger'}>
+                              +{response.breakdown.Marktanpassung} €
+                            </td>
                           </tr>
                           <tr>
                             <td>Abschlag (Wegerecht)</td>
@@ -769,13 +795,13 @@ export default function PropertyEvaluationForm() {
                   <div className="mt-4 text-start">
                     <h5 className="fs-5 fw-semibold text-dark">Preissteigernde Faktoren:</h5>
                     <ul className="list-group list-group-flush">
-                      {response.priceIncreaseFactors.map((factor, index) => (
+                      {response.priceIncreaseFactors.slice(0, 3).map((factor, index) => (
                         <li key={index} className="list-group-item">{factor}</li>
                       ))}
                     </ul>
                     <h5 className="fs-5 fw-semibold text-dark mt-3">Preissenkende Faktoren:</h5>
                     <ul className="list-group list-group-flush">
-                      {response.priceDecreaseFactors.map((factor, index) => (
+                      {response.priceDecreaseFactors.slice(0, 3).map((factor, index) => (
                         <li key={index} className="list-group-item">{factor}</li>
                       ))}
                     </ul>
