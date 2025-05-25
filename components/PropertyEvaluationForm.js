@@ -329,7 +329,7 @@ export default function PropertyEvaluationForm() {
       if (res.ok) {
         setResponse(data.evaluation);
         setCurrentStep(steps.length);
-        localStorage.removeItem('formData'); // Clear saved data on successful submission
+        localStorage.removeItem('formData');
       } else {
         setError(data.error || 'Fehler bei der Bewertung');
       }
@@ -443,16 +443,20 @@ export default function PropertyEvaluationForm() {
     );
   };
 
+  const isStepCompleted = (stepIndex) => {
+    return steps[stepIndex].fields.every((field) => !field.required || formData[field.name]);
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 font-inter">
       <motion.div
         className="max-w-4xl w-full bg-neutral shadow-card rounded-2xl overflow-hidden"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
+        transition={{ duration: 1, ease: 'easeOut' }}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-primary to-blue-900 p-6 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-blue-800 to-blue-600 p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <FaHome className="text-secondary text-4xl sm:text-5xl" />
             <h2 className="text-3xl sm:text-4xl font-bold text-white">
@@ -465,14 +469,14 @@ export default function PropertyEvaluationForm() {
         </div>
 
         {/* Hauptinhalt */}
-        <div className="p-8 sm:p-10">
+        <div className="p-8 sm:p-12">
           {/* Fortschrittsanzeige */}
-          <div className="mb-10">
+          <div className="mb-12">
             <div className="flex justify-between mb-4">
               {steps.map((step, index) => (
                 <div
                   key={index}
-                  className={`flex-1 text-center text-sm font-medium flex flex-col items-center ${
+                  className={`flex-1 text-center text-sm font-medium flex flex-col items-center relative ${
                     index <= currentStep ? 'text-primary' : 'text-gray-400'
                   }`}
                 >
@@ -486,20 +490,24 @@ export default function PropertyEvaluationForm() {
                       scale: index === currentStep ? 1.2 : 1,
                       rotate: index <= currentStep ? 360 : 0,
                     }}
-                    transition={{ duration: 0.6, ease: 'easeInOut' }}
+                    transition={{ duration: 0.8, ease: 'easeInOut' }}
                   >
-                    {step.icon}
+                    {isStepCompleted(index) && index < currentStep ? (
+                      <FaCheckCircle className="text-green-500" />
+                    ) : (
+                      step.icon
+                    )}
                   </motion.div>
                   <span className="text-xs sm:text-sm">{step.title}</span>
                 </div>
               ))}
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 rounded-full h-3">
               <motion.div
-                className="bg-gradient-to-r from-primary to-blue-900 h-2 rounded-full"
+                className="bg-gradient-to-r from-blue-800 to-blue-600 h-3 rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-                transition={{ duration: 0.6, ease: 'easeInOut' }}
+                transition={{ duration: 0.8, ease: 'easeInOut' }}
               />
             </div>
             <div className="text-center mt-2 text-sm text-gray-600">
@@ -514,23 +522,23 @@ export default function PropertyEvaluationForm() {
                 initial={{ opacity: 0, x: 100 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -100 }}
-                transition={{ duration: 0.6, ease: 'easeInOut' }}
+                transition={{ duration: 0.8, ease: 'easeInOut' }}
                 onSubmit={currentStep === steps.length - 1 ? handleSubmit : (e) => e.preventDefault()}
-                className="space-y-8"
+                className="space-y-10"
               >
-                <h3 className="text-2xl sm:text-3xl font-semibold text-primary flex items-center gap-3">
+                <h3 className="text-2xl sm:text-3xl font-semibold text-blue-800 flex items-center gap-3">
                   {steps[currentStep].icon} {steps[currentStep].title}
                 </h3>
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {steps[currentStep].fields.map((field) => (
                     <motion.div
                       key={field.name}
-                      className="bg-neutral p-5 rounded-xl shadow-card border border-gray-100 group"
+                      className="bg-neutral p-6 rounded-xl shadow-card border border-gray-100 group"
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.1 }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
                     >
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-3">
                         {field.label}
                         {field.required && <span className="text-red-500">*</span>}
                       </label>
@@ -538,7 +546,7 @@ export default function PropertyEvaluationForm() {
                     </motion.div>
                   ))}
                 </div>
-                <div className="flex justify-between mt-10">
+                <div className="flex justify-between mt-12">
                   {currentStep > 0 && (
                     <motion.button
                       type="button"
@@ -553,8 +561,8 @@ export default function PropertyEvaluationForm() {
                   <motion.button
                     type={currentStep === steps.length - 1 ? 'submit' : 'button'}
                     onClick={currentStep < steps.length - 1 ? nextStep : undefined}
-                    className="px-6 py-3 bg-primary text-white rounded-xl hover:bg-blue-900 transition-all duration-300 shadow-sm text-sm sm:text-base flex items-center justify-center"
-                    whileHover={{ scale: 1.05, backgroundColor: '#00205B' }}
+                    className="px-6 py-3 bg-blue-800 text-white rounded-xl hover:bg-blue-900 transition-all duration-300 shadow-sm text-sm sm:text-base flex items-center justify-center"
+                    whileHover={{ scale: 1.05, backgroundColor: '#1E3A8A' }}
                     whileTap={{ scale: 0.95 }}
                     disabled={isLoading}
                   >
@@ -573,28 +581,28 @@ export default function PropertyEvaluationForm() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.6, ease: 'easeOut' }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
                   className="text-center"
                 >
-                  <h3 className="text-2xl sm:text-3xl font-semibold text-primary mb-6 flex items-center justify-center gap-3">
+                  <h3 className="text-2xl sm:text-3xl font-semibold text-blue-800 mb-6 flex items-center justify-center gap-3">
                     <FaChartLine className="text-secondary" /> Ihre Bewertung
                   </h3>
                   <div className="bg-accent p-8 rounded-xl space-y-6 shadow-card">
                     <p className="text-lg sm:text-xl">
-                      <strong className="text-primary">Geschätzter Verkehrswert:</strong>{' '}
+                      <strong className="text-blue-800">Geschätzter Verkehrswert:</strong>{' '}
                       <span className="text-secondary font-bold">{response.price}</span>
                     </p>
                     <p className="text-lg sm:text-xl">
-                      <strong className="text-primary">Lagebewertung:</strong> {response.location}
+                      <strong className="text-blue-800">Lagebewertung:</strong> {response.location}
                     </p>
                     <p className="text-lg sm:text-xl">
-                      <strong className="text-primary">Zustand:</strong> {response.condition}
+                      <strong className="text-blue-800">Zustand:</strong> {response.condition}
                     </p>
                   </div>
                   <motion.button
                     onClick={() => setCurrentStep(0)}
-                    className="mt-8 px-6 py-3 bg-primary text-white rounded-xl hover:bg-blue-900 transition-all duration-300 shadow-sm text-sm sm:text-base"
-                    whileHover={{ scale: 1.05, backgroundColor: '#00205B' }}
+                    className="mt-8 px-6 py-3 bg-blue-800 text-white rounded-xl hover:bg-blue-900 transition-all duration-300 shadow-sm text-sm sm:text-base"
+                    whileHover={{ scale: 1.05, backgroundColor: '#1E3A8A' }}
                     whileTap={{ scale: 0.95 }}
                   >
                     Neue Bewertung starten
@@ -612,7 +620,7 @@ export default function PropertyEvaluationForm() {
               {error}
               <button
                 onClick={() => setCurrentStep(0)}
-                className="ml-2 text-primary underline hover:text-blue-900"
+                className="ml-2 text-blue-800 underline hover:text-blue-900"
               >
                 Zurück zum Anfang
               </button>
