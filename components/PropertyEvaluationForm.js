@@ -73,7 +73,7 @@ export default function PropertyEvaluationForm() {
           ],
           section: 'Immobilientyp',
         },
-        { name: 'constructionYear', label: 'Baujahr', type: 'number', required: true, section: 'Immobilientyp' },
+        { name: 'constructionYear', label: 'Baujahr', type: 'number', required: true, section: 'Immobilientyp', tooltip: 'Geben Sie das Jahr der Fertigstellung des Gebäudes ein.' },
         {
           name: 'evaluationPurpose',
           label: 'Anlass der Bewertung',
@@ -139,6 +139,7 @@ export default function PropertyEvaluationForm() {
             { value: 'nein', label: 'Nein' },
             { value: 'ja', label: 'Ja' },
           ],
+          tooltip: 'Grundbuchliche Belastungen sind Rechte Dritter, wie z. B. ein Wegerecht oder eine Hypothek, die im Grundbuch eingetragen sind.',
           section: 'Bebauungsdetails',
         },
         {
@@ -149,6 +150,7 @@ export default function PropertyEvaluationForm() {
             { value: 'nein', label: 'Nein' },
             { value: 'ja', label: 'Ja' },
           ],
+          tooltip: 'Informationen zu Überschwemmungsgebieten finden Sie bei Ihrer Gemeinde oder auf Karten von Umweltbehörden.',
           section: 'Bebauungsdetails',
         },
       ],
@@ -157,7 +159,7 @@ export default function PropertyEvaluationForm() {
       title: 'Gebäude und bauliche Anlagen',
       icon: <FaBuilding />,
       fields: [
-        { name: 'livingArea', label: 'Wohnfläche (m²)', type: 'number', required: true, section: 'Gebäudedetails' },
+        { name: 'livingArea', label: 'Wohnfläche (m²)', type: 'number', required: true, section: 'Gebäudedetails', tooltip: 'Geben Sie die tatsächliche Wohnfläche ohne Nebenflächen (z. B. Keller) ein.' },
         { name: 'rooms', label: 'Anzahl der Zimmer', type: 'number', required: true, section: 'Gebäudedetails' },
         { name: 'floors', label: 'Anzahl der Vollgeschosse', type: 'number', required: true, section: 'Gebäudedetails' },
         {
@@ -297,6 +299,7 @@ export default function PropertyEvaluationForm() {
           label: 'Marktübliche Miete pro m² (€/m²/Monat, falls bekannt)',
           type: 'number',
           section: 'Marktdaten',
+          tooltip: 'Informationen zur marktüblichen Miete finden Sie in Mietspiegeln oder bei Immobilienportalen.',
         },
         { name: 'capitalizationRate', label: 'Liegenschaftszinssatz (%, falls bekannt)', type: 'number', section: 'Marktdaten' },
       ],
@@ -345,6 +348,14 @@ export default function PropertyEvaluationForm() {
       textContent += `Geschätzter Verkehrswert: ${response.price}\n`;
       textContent += `Lagebewertung: ${response.location}\n`;
       textContent += `Zustand: ${response.condition}\n`;
+      textContent += '\nPreissteigernde Faktoren:\n';
+      response.priceIncreaseFactors.forEach((factor, index) => {
+        textContent += `${index + 1}. ${factor}\n`;
+      });
+      textContent += '\nPreissenkende Faktoren:\n';
+      response.priceDecreaseFactors.forEach((factor, index) => {
+        textContent += `${index + 1}. ${factor}\n`;
+      });
     }
 
     // Textdokument erstellen und herunterladen
@@ -375,7 +386,7 @@ export default function PropertyEvaluationForm() {
       });
       const data = await res.json();
       if (res.ok) {
-        setResponse(data.evaluation);
+        setResponse(data);
         setCurrentStep(steps.length);
         localStorage.removeItem('formData');
       } else {
@@ -539,13 +550,13 @@ export default function PropertyEvaluationForm() {
                 className="progress-bar"
                 role="progressbar"
                 initial={{ width: 0 }}
-                animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+                animate={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
                 transition={{ duration: 0.8, ease: 'easeInOut' }}
                 style={{ backgroundColor: '#60C8E8' }}
               />
             </div>
             <span className="text-muted fw-medium" style={{ fontSize: '14px' }}>
-              {Math.round(((currentStep + 1) / steps.length) * 100)}%
+              {Math.round((currentStep / (steps.length - 1)) * 100)}%
             </span>
           </div>
         </div>
@@ -641,6 +652,20 @@ export default function PropertyEvaluationForm() {
                   <p className="fs-5">
                     <strong style={{ color: '#60C8E8' }}>Zustand:</strong> {response.condition}
                   </p>
+                  <div className="mt-4 text-start">
+                    <h5 className="fs-5 fw-semibold text-dark">Preissteigernde Faktoren:</h5>
+                    <ul className="list-group list-group-flush">
+                      {response.priceIncreaseFactors.map((factor, index) => (
+                        <li key={index} className="list-group-item">{factor}</li>
+                      ))}
+                    </ul>
+                    <h5 className="fs-5 fw-semibold text-dark mt-3">Preissenkende Faktoren:</h5>
+                    <ul className="list-group list-group-flush">
+                      {response.priceDecreaseFactors.map((factor, index) => (
+                        <li key={index} className="list-group-item">{factor}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
                 <div className="d-flex justify-content-center gap-3">
                   <motion.button
