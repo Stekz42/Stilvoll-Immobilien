@@ -16,6 +16,12 @@ export default function PropertyEvaluationForm() {
       city: '',
       zipCode: '',
       propertyType: 'einfamilienhaus',
+      numberOfUnits: '', // Für Mehrfamilienhäuser
+      annualGrossRent: '', // Für Mehrfamilienhäuser und Gewerbe
+      operatingCosts: '', // Für Mehrfamilienhäuser und Gewerbe
+      vacancyRate: '', // Für Mehrfamilienhäuser
+      commercialUseType: '', // Für Gewerbeimmobilien
+      usableArea: '', // Für Gewerbeimmobilien
       constructionYear: '',
       evaluationPurpose: 'verkauf',
       plotSize: '',
@@ -84,6 +90,7 @@ export default function PropertyEvaluationForm() {
           type: 'select',
           options: [
             { value: 'einfamilienhaus', label: 'Einfamilienhaus' },
+            { value: 'mehrfamilienhaus', label: 'Mehrfamilienhaus' }, // Neue Option
             { value: 'wohnung', label: 'Wohnung' },
             { value: 'gewerbe', label: 'Gewerbe' },
           ],
@@ -104,6 +111,39 @@ export default function PropertyEvaluationForm() {
           description: 'Wählen Sie den Grund für die Bewertung aus (z. B. Verkauf).',
         },
       ],
+    },
+    {
+      title: 'Spezifische Informationen',
+      icon: <FaBuilding />,
+      fields: [
+        // Dynamische Felder für Mehrfamilienhäuser
+        ...(formData.propertyType === 'mehrfamilienhaus' ? [
+          { name: 'numberOfUnits', label: 'Anzahl der Wohneinheiten', type: 'number', required: true, section: 'Mehrfamilienhaus', description: 'Geben Sie die Anzahl der Wohneinheiten ein (z. B. 3).' },
+          { name: 'annualGrossRent', label: 'Jahresbruttomiete (€)', type: 'number', required: true, section: 'Mehrfamilienhaus', description: 'Geben Sie die gesamte Jahresbruttomiete ein (z. B. 36.000 €).' },
+          { name: 'operatingCosts', label: 'Bewirtschaftungskosten (€/Jahr)', type: 'number', required: true, section: 'Mehrfamilienhaus', description: 'Geben Sie die jährlichen Bewirtschaftungskosten ein (z. B. 5.000 €).' },
+          { name: 'vacancyRate', label: 'Mietausfallrisiko (%)', type: 'number', required: true, section: 'Mehrfamilienhaus', description: 'Geben Sie das Mietausfallrisiko in Prozent ein (z. B. 5 %).' },
+        ] : []),
+        // Dynamische Felder für Gewerbeimmobilien
+        ...(formData.propertyType === 'gewerbe' ? [
+          { name: 'usableArea', label: 'Nutzfläche (m²)', type: 'number', required: true, section: 'Gewerbeimmobilie', description: 'Geben Sie die Nutzfläche in Quadratmetern ein (z. B. 200 m²).' },
+          {
+            name: 'commercialUseType',
+            label: 'Art der Gewerbenutzung',
+            type: 'select',
+            options: [
+              { value: 'büro', label: 'Büro' },
+              { value: 'lager', label: 'Lager' },
+              { value: 'einzelhandel', label: 'Einzelhandel' },
+              { value: 'sonstiges', label: 'Sonstiges' },
+            ],
+            required: true,
+            section: 'Gewerbeimmobilie',
+            description: 'Wählen Sie die Art der Gewerbenutzung aus.',
+          },
+          { name: 'annualGrossRent', label: 'Jahresbruttomiete (€)', type: 'number', required: true, section: 'Gewerbeimmobilie', description: 'Geben Sie die gesamte Jahresbruttomiete ein (z. B. 50.000 €).' },
+          { name: 'operatingCosts', label: 'Bewirtschaftungskosten (€/Jahr)', type: 'number', required: true, section: 'Gewerbeimmobilie', description: 'Geben Sie die jährlichen Bewirtschaftungskosten ein (z. B. 8.000 €).' },
+        ] : []),
+      ].filter(field => field), // Entfernt leere Felder
     },
     {
       title: 'Grundstück',
@@ -180,32 +220,34 @@ export default function PropertyEvaluationForm() {
       title: 'Gebäude und bauliche Anlagen',
       icon: <FaBuilding />,
       fields: [
-        { name: 'livingArea', label: 'Wohnfläche (m²)', type: 'number', required: true, section: 'Gebäudedetails', description: 'Geben Sie die tatsächliche Wohnfläche ohne Nebenflächen (z. B. Keller) in Quadratmetern ein (z. B. 120).' },
-        { name: 'rooms', label: 'Anzahl der Zimmer', type: 'number', required: true, section: 'Gebäudedetails', description: 'Geben Sie die Anzahl der Zimmer ein (z. B. 4).' },
-        { name: 'floors', label: 'Anzahl der Vollgeschosse', type: 'number', required: true, section: 'Gebäudedetails', description: 'Geben Sie die Anzahl der Vollgeschosse ein (z. B. 2).' },
-        {
-          name: 'basement',
-          label: 'Unterkellert',
-          type: 'select',
-          options: [
-            { value: 'ja', label: 'Ja' },
-            { value: 'nein', label: 'Nein' },
-          ],
-          section: 'Gebäudedetails',
-          description: 'Wählen Sie aus, ob die Immobilie unterkellert ist (z. B. Ja).',
-        },
-        {
-          name: 'roofing',
-          label: 'Bedachung',
-          type: 'select',
-          options: [
-            { value: 'satteldach', label: 'Satteldach' },
-            { value: 'flachdach', label: 'Flachdach' },
-            { value: 'walmdach', label: 'Walmdach' },
-          ],
-          section: 'Gebäudedetails',
-          description: 'Wählen Sie den Typ der Bedachung aus (z. B. Satteldach).',
-        },
+        ...(formData.propertyType !== 'gewerbe' ? [
+          { name: 'livingArea', label: 'Wohnfläche (m²)', type: 'number', required: true, section: 'Gebäudedetails', description: 'Geben Sie die tatsächliche Wohnfläche ohne Nebenflächen (z. B. Keller) in Quadratmetern ein (z. B. 120).' },
+          { name: 'rooms', label: 'Anzahl der Zimmer', type: 'number', required: true, section: 'Gebäudedetails', description: 'Geben Sie die Anzahl der Zimmer ein (z. B. 4).' },
+          { name: 'floors', label: 'Anzahl der Vollgeschosse', type: 'number', required: true, section: 'Gebäudedetails', description: 'Geben Sie die Anzahl der Vollgeschosse ein (z. B. 2).' },
+          {
+            name: 'basement',
+            label: 'Unterkellert',
+            type: 'select',
+            options: [
+              { value: 'ja', label: 'Ja' },
+              { value: 'nein', label: 'Nein' },
+            ],
+            section: 'Gebäudedetails',
+            description: 'Wählen Sie aus, ob die Immobilie unterkellert ist (z. B. Ja).',
+          },
+          {
+            name: 'roofing',
+            label: 'Bedachung',
+            type: 'select',
+            options: [
+              { value: 'satteldach', label: 'Satteldach' },
+              { value: 'flachdach', label: 'Flachdach' },
+              { value: 'walmdach', label: 'Walmdach' },
+            ],
+            section: 'Gebäudedetails',
+            description: 'Wählen Sie den Typ der Bedachung aus (z. B. Satteldach).',
+          },
+        ] : []),
         {
           name: 'garage',
           label: 'Garage',
@@ -219,54 +261,56 @@ export default function PropertyEvaluationForm() {
           description: 'Wählen Sie aus, ob eine Garage vorhanden ist (z. B. Nein).',
         },
         { name: 'garageArea', label: 'Garagefläche (m²)', type: 'number', section: 'Zusätzliche Anlagen', description: 'Geben Sie die Fläche der Garage in Quadratmetern ein, falls vorhanden (z. B. 30).' },
-        {
-          name: 'outdoorFacilities',
-          label: 'Außenanlagen',
-          type: 'checkbox',
-          options: [
-            { value: 'terrasse', label: 'Terrasse' },
-            { value: 'balkon', label: 'Balkon' },
-            { value: 'garten', label: 'Garten' },
-          ],
-          section: 'Zusätzliche Anlagen',
-          description: 'Wählen Sie alle zutreffenden Außenanlagen aus (z. B. Terrasse, Garten).',
-        },
-        {
-          name: 'equipmentLevel',
-          label: 'Ausstattungsgrad',
-          type: 'select',
-          options: [
-            { value: 'einfach', label: 'Einfach' },
-            { value: 'mittel', label: 'Mittel' },
-            { value: 'gehoben', label: 'Gehoben' },
-          ],
-          section: 'Ausstattung',
-          description: 'Wählen Sie den Ausstattungsgrad der Immobilie aus (z. B. Mittel).',
-        },
-        {
-          name: 'heatingSystem',
-          label: 'Heizungssystem',
-          type: 'select',
-          options: [
-            { value: 'gas', label: 'Gas' },
-            { value: 'öl', label: 'Öl' },
-            { value: 'wärmepumpe', label: 'Wärmepumpe' },
-          ],
-          section: 'Ausstattung',
-          description: 'Wählen Sie das Heizungssystem aus (z. B. Gas).',
-        },
-        {
-          name: 'sanitaryCondition',
-          label: 'Zustand der Sanitäranlagen',
-          type: 'select',
-          options: [
-            { value: 'modern', label: 'Modern' },
-            { value: 'baujahrestypisch', label: 'Baujahrestypisch' },
-            { value: 'renovierungsbedürftig', label: 'Renovierungsbedürftig' },
-          ],
-          section: 'Ausstattung',
-          description: 'Wählen Sie den Zustand der Sanitäranlagen aus (z. B. Baujahrestypisch).',
-        },
+        ...(formData.propertyType !== 'gewerbe' ? [
+          {
+            name: 'outdoorFacilities',
+            label: 'Außenanlagen',
+            type: 'checkbox',
+            options: [
+              { value: 'terrasse', label: 'Terrasse' },
+              { value: 'balkon', label: 'Balkon' },
+              { value: 'garten', label: 'Garten' },
+            ],
+            section: 'Zusätzliche Anlagen',
+            description: 'Wählen Sie alle zutreffenden Außenanlagen aus (z. B. Terrasse, Garten).',
+          },
+          {
+            name: 'equipmentLevel',
+            label: 'Ausstattungsgrad',
+            type: 'select',
+            options: [
+              { value: 'einfach', label: 'Einfach' },
+              { value: 'mittel', label: 'Mittel' },
+              { value: 'gehoben', label: 'Gehoben' },
+            ],
+            section: 'Ausstattung',
+            description: 'Wählen Sie den Ausstattungsgrad der Immobilie aus (z. B. Mittel).',
+          },
+          {
+            name: 'heatingSystem',
+            label: 'Heizungssystem',
+            type: 'select',
+            options: [
+              { value: 'gas', label: 'Gas' },
+              { value: 'öl', label: 'Öl' },
+              { value: 'wärmepumpe', label: 'Wärmepumpe' },
+            ],
+            section: 'Ausstattung',
+            description: 'Wählen Sie das Heizungssystem aus (z. B. Gas).',
+          },
+          {
+            name: 'sanitaryCondition',
+            label: 'Zustand der Sanitäranlagen',
+            type: 'select',
+            options: [
+              { value: 'modern', label: 'Modern' },
+              { value: 'baujahrestypisch', label: 'Baujahrestypisch' },
+              { value: 'renovierungsbedürftig', label: 'Renovierungsbedürftig' },
+            ],
+            section: 'Ausstattung',
+            description: 'Wählen Sie den Zustand der Sanitäranlagen aus (z. B. Baujahrestypisch).',
+          },
+        ] : []),
       ],
     },
     {
@@ -326,13 +370,15 @@ export default function PropertyEvaluationForm() {
       title: 'Markt- und Ertragsdaten',
       icon: <FaChartLine />,
       fields: [
-        {
-          name: 'marketRent',
-          label: 'Marktübliche Miete pro m² (€/m²/Monat, falls bekannt)',
-          type: 'number',
-          section: 'Marktdaten',
-          description: 'Geben Sie die marktübliche Miete pro Quadratmeter ein, falls bekannt (z. B. 12). Diese Information finden Sie in Mietspiegeln oder bei Immobilienportalen.',
-        },
+        ...(formData.propertyType !== 'mehrfamilienhaus' && formData.propertyType !== 'gewerbe' ? [
+          {
+            name: 'marketRent',
+            label: 'Marktübliche Miete pro m² (€/m²/Monat, falls bekannt)',
+            type: 'number',
+            section: 'Marktdaten',
+            description: 'Geben Sie die marktübliche Miete pro Quadratmeter ein, falls bekannt (z. B. 12). Diese Information finden Sie in Mietspiegeln oder bei Immobilienportalen.',
+          },
+        ] : []),
         { name: 'capitalizationRate', label: 'Liegenschaftszinssatz (%, falls bekannt)', type: 'number', section: 'Marktdaten', description: 'Geben Sie den Liegenschaftszinssatz in Prozent ein, falls bekannt (z. B. 2.8).' },
       ],
     },
