@@ -824,9 +824,9 @@ export default function PropertyEvaluationForm() {
                           </tr>
                           <tr>
                             <td>Marktanpassung</td>
-                            <td className={parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? 'text-success' : 'text-danger'}>
-                              +{response.breakdown.Marktanpassung} €
-                            </td>
+                           <td className={parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? 'text-success' : 'text-danger'}>
+  {parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? '+' : '-'}{response.breakdown.Marktanpassung} €
+</td>
                           </tr>
                           <tr>
                             <td>Abschlag (Wegerecht)</td>
