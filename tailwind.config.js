@@ -7,11 +7,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#1E3A8A', // Dunkelblau für Überschriften/Akzente
-        secondary: '#FBBF24', // Gold als Akzent (z. B. für abgeschlossene Schritte)
+        primary: '#00C4B4', // Cyan für Akzente (ähnlich ImmoScout24)
+        secondary: '#FBBF24', // Gold bleibt für abgeschlossene Schritte
         neutral: '#FFFFFF', // Weiß für Kacheln
-        accent: '#D1D5DB', // Hellgrau für Linien
-        background: '#F9FAFB', // Hintergrundfarbe
+        accent: '#E5E7EB', // Hellgrau für Linien
+        background: '#FFFFFF', // Weißer Hintergrund wie bei ImmoScout24
       },
       fontFamily: {
         roboto: ['Roboto', 'sans-serif'],
