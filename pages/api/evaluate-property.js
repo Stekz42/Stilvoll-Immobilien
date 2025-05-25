@@ -1,8 +1,4 @@
 // pages/api/evaluate-property.js
-const sgMail = require('@sendgrid/mail');
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -88,22 +84,6 @@ export default async function handler(req, res) {
       marketRent: parseFloat(marketRent) || 12,
       capitalizationRate: parseFloat(capitalizationRate) || 2.8,
     };
-
-    // E-Mail senden
-    try {
-      const msg = {
-        to: 'info@konzept-stilvoll.de',
-        from: 'info@stilvoll-immobilien.com', // Ersetze dies mit deiner verifizierten E-Mail-Adresse
-        subject: 'Neue Immobilienbewertung',
-        text: `Eine neue Bewertung wurde eingereicht:\n\n${JSON.stringify(propertyData, null, 2)}`,
-      };
-
-      await sgMail.send(msg);
-      console.log('E-Mail erfolgreich gesendet an info@konzept-stilvoll.de');
-    } catch (emailError) {
-      console.error('Fehler beim Senden der E-Mail:', emailError.message);
-      return res.status(500).json({ error: 'Fehler beim Senden der E-Mail: ' + emailError.message });
-    }
 
     // Sachwertverfahren (primäres Verfahren)
     const Bodenwert = propertyData.plotSize * propertyData.soilValue;
