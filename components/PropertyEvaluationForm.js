@@ -385,38 +385,37 @@ export default function PropertyEvaluationForm() {
   const renderField = (field) => {
     const hasError = fieldErrors[field.name];
     return (
-      <div className="relative w-full">
+      <div className="position-relative w-100">
         {field.type === 'text' || field.type === 'number' ? (
           <motion.div
-            className="relative"
+            className="position-relative"
             whileHover={{ scale: 1.02 }}
             whileFocus={{ scale: 1.02 }}
           >
-            <div className="relative">
+            <div className="position-relative">
               <input
                 type={field.type}
                 name={field.name}
                 value={formData[field.name]}
                 onChange={handleChange}
-                className={`w-full max-w-lg p-4 pl-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 text-base shadow-sm ${
-                  hasError ? 'border-red-500' : 'border-gray-200'
-                }`}
+                className={`form-control ${hasError ? 'is-invalid' : ''}`}
+                style={{ paddingLeft: '40px', fontSize: '16px', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
                 placeholder={field.label}
                 required={field.required}
               />
-              <FaMapMarkerAlt className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <FaMapMarkerAlt className="position-absolute" style={{ left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#6c757d' }} />
             </div>
             {formData[field.name] && !hasError && (
-              <FaCheckCircle className="absolute right-4 top-1/2 transform -translate-y-1/2 text-primary" />
+              <FaCheckCircle className="position-absolute text-success" style={{ right: '10px', top: '50%', transform: 'translateY(-50%)' }} />
             )}
             {hasError && (
-              <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-red-500 text-sm">
+              <div className="invalid-feedback" style={{ display: 'block', fontSize: '14px' }}>
                 {hasError}
-              </span>
+              </div>
             )}
             {field.tooltip && (
-              <div className="absolute right-12 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-help">
-                <span className="tooltip-text bg-gray-800 text-white text-xs rounded p-2 absolute z-10 hidden group-hover:block -top-10 right-0">
+              <div className="position-absolute" style={{ right: '40px', top: '50%', transform: 'translateY(-50%)', color: '#6c757d', cursor: 'help' }}>
+                <span className="bg-dark text-white p-2 rounded position-absolute" style={{ display: 'none', top: '-40px', right: '0', fontSize: '12px' }}>
                   {field.tooltip}
                 </span>
                 ❓
@@ -428,9 +427,8 @@ export default function PropertyEvaluationForm() {
             name={field.name}
             value={formData[field.name]}
             onChange={handleChange}
-            className={`w-full max-w-lg p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-white text-gray-800 text-base shadow-sm ${
-              hasError ? 'border-red-500' : 'border-gray-200'
-            }`}
+            className={`form-select ${hasError ? 'is-invalid' : ''}`}
+            style={{ fontSize: '16px', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
             whileHover={{ scale: 1.02 }}
           >
             {field.options.map((option) => (
@@ -444,19 +442,19 @@ export default function PropertyEvaluationForm() {
             name={field.name}
             value={formData[field.name]}
             onChange={handleChange}
-            className={`w-full max-w-lg p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 text-base shadow-sm ${
-              hasError ? 'border-red-500' : 'border-gray-200'
-            }`}
+            className={`form-control ${hasError ? 'is-invalid' : ''}`}
+            style={{ fontSize: '16px', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
             rows="4"
             placeholder={field.label}
             whileHover={{ scale: 1.02 }}
           />
         ) : field.type === 'checkbox' ? (
-          <div className="space-y-2.5">
+          <div className="d-flex flex-column gap-2">
             {field.options.map((option) => (
               <motion.label
                 key={option.value}
-                className="flex items-center cursor-pointer"
+                className="form-check-label d-flex align-items-center"
+                style={{ cursor: 'pointer' }}
                 whileHover={{ scale: 1.02 }}
               >
                 <input
@@ -465,9 +463,10 @@ export default function PropertyEvaluationForm() {
                   value={option.value}
                   checked={formData[field.name].includes(option.value)}
                   onChange={handleChange}
-                  className="h-5 w-5 text-primary focus:ring-primary border-gray-200 rounded"
+                  className="form-check-input me-2"
+                  style={{ width: '20px', height: '20px' }}
                 />
-                <span className="ml-2 text-base text-gray-700">{option.label}</span>
+                <span style={{ fontSize: '16px', color: '#333' }}>{option.label}</span>
               </motion.label>
             ))}
           </div>
@@ -477,29 +476,46 @@ export default function PropertyEvaluationForm() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-between py-8 px-4 sm:px-6 lg:px-8 font-roboto">
-      <div className="max-w-5xl w-full">
+    <div
+      className="min-vh-100 d-flex flex-column align-items-center justify-content-between py-4 px-3"
+      style={{
+        fontFamily: "'Roboto', sans-serif",
+        backgroundColor: '#FFFFFF',
+        backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"40\" viewBox=\"0 0 40 40\"%3E%3Cg fill=\"%23E5E7EB\" fill-opacity=\"0.3\"%3E%3Cpath d=\"M0 0h40v40H0z\"/%3E%3Cpath d=\"M20 20a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4zm8 0a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4zm-16 8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4zm16 0a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4z\"/%3E%3C/g%3E%3C/svg%3E")',
+        backgroundSize: '40px 40px',
+        backgroundOpacity: '0.8',
+      }}
+    >
+      <div className="w-100" style={{ maxWidth: '800px' }}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 px-4">
-          <div className="flex items-center">
-            <h2 className="text-xl font-bold text-primary">Stilvoll Immobilien</h2>
+        <div className="d-flex justify-content-between align-items-center mb-4 px-3">
+          <div className="d-flex align-items-center">
+            <h2 className="fs-4 fw-bold text-primary m-0" style={{ color: '#00C4B4' }}>
+              Stilvoll Immobilien
+            </h2>
           </div>
-          <div className="text-sm text-gray-600">Die Nr. 1 für Immobilien.</div>
+          <div className="text-muted" style={{ fontSize: '14px' }}>
+            Die Nr. 1 für Immobilien.
+          </div>
         </div>
 
         {/* Fortschrittsanzeige */}
-        <div className="flex justify-end mb-8 px-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-600">Bewertung</span>
-            <div className="w-32 bg-gray-200 rounded-full h-2">
+        <div className="d-flex justify-content-end mb-4 px-3">
+          <div className="d-flex align-items-center gap-2">
+            <span className="text-muted fw-medium" style={{ fontSize: '14px' }}>
+              Bewertung
+            </span>
+            <div className="progress" style={{ width: '120px', height: '8px', borderRadius: '4px', backgroundColor: '#E5E7EB' }}>
               <motion.div
-                className="bg-primary h-2 rounded-full"
+                className="progress-bar bg-info"
+                role="progressbar"
                 initial={{ width: 0 }}
                 animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
                 transition={{ duration: 0.8, ease: 'easeInOut' }}
+                style={{ backgroundColor: '#00C4B4' }}
               />
             </div>
-            <span className="text-sm font-medium text-gray-600">
+            <span className="text-muted fw-medium" style={{ fontSize: '14px' }}>
               {Math.round(((currentStep + 1) / steps.length) * 100)}%
             </span>
           </div>
@@ -514,35 +530,33 @@ export default function PropertyEvaluationForm() {
               exit={{ opacity: 0, x: -100 }}
               transition={{ duration: 0.8, ease: 'easeInOut' }}
               onSubmit={currentStep === steps.length - 1 ? handleSubmit : (e) => e.preventDefault()}
-              className="space-y-10 flex flex-col items-center"
+              className="d-flex flex-column align-items-center gap-4"
             >
-              <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                {steps[currentStep].title}
-              </h3>
-              <div className="space-y-8 w-full max-w-2xl">
+              <h3 className="fs-3 fw-bold text-dark">{steps[currentStep].title}</h3>
+              <div className="w-100" style={{ maxWidth: '500px' }}>
                 {[...new Set(steps[currentStep].fields.map((field) => field.section))].map((section) => (
-                  <div key={section} className="space-y-5">
-                    <h4 className="text-lg font-semibold text-gray-700 text-center">{section}</h4>
-                    <div className="flex flex-col items-center gap-6">
+                  <div key={section} className="mb-4">
+                    <h4 className="fs-5 fw-semibold text-dark text-center mb-3">{section}</h4>
+                    <div className="d-flex flex-column align-items-center gap-3">
                       {steps[currentStep].fields
                         .filter((field) => field.section === section)
                         .map((field) => (
-                          <div key={field.name} className="w-full flex justify-center">
+                          <div key={field.name} className="w-100">
                             {renderField(field)}
                           </div>
                         ))}
                     </div>
-                    <hr className="border-t border-gray-200" />
                   </div>
                 ))}
               </div>
-              <div className="flex justify-center mt-12 gap-4">
+              <div className="d-flex justify-content-center gap-3 mt-4">
                 {currentStep > 0 && (
                   <motion.button
                     type="button"
                     onClick={prevStep}
-                    className="px-8 py-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 shadow-sm text-base font-medium"
-                    whileHover={{ scale: 1.05, backgroundColor: '#D1D5DB' }}
+                    className="btn btn-outline-secondary"
+                    style={{ padding: '12px 30px', fontSize: '16px', borderRadius: '8px' }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     Zurück
@@ -551,15 +565,15 @@ export default function PropertyEvaluationForm() {
                 <motion.button
                   type={currentStep === steps.length - 1 ? 'submit' : 'button'}
                   onClick={currentStep < steps.length - 1 ? nextStep : undefined}
-                  className="px-8 py-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 shadow-sm text-base font-medium flex items-center justify-center"
-                  whileHover={{ scale: 1.05, backgroundColor: '#D1D5DB' }}
+                  className="btn btn-outline-secondary d-flex align-items-center justify-content-center"
+                  style={{ padding: '12px 30px', fontSize: '16px', borderRadius: '8px' }}
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    <svg className="animate-spin h-5 w-5 mr-2 text-gray-700" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    <svg className="spinner-border spinner-border-sm me-2" role="status" style={{ width: '20px', height: '20px' }}>
+                      <span className="visually-hidden">Loading...</span>
                     </svg>
                   ) : null}
                   {currentStep === steps.length - 1 ? 'Bewertung anfordern' : 'Weiter'}
@@ -574,25 +588,24 @@ export default function PropertyEvaluationForm() {
                 transition={{ duration: 0.8, ease: 'easeOut' }}
                 className="text-center"
               >
-                <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center justify-center gap-2">
-                  <FaChartLine className="text-secondary" /> Ihre Bewertung
-                </h3>
-                <div className="bg-neutral p-8 rounded-xl space-y-6 shadow-card">
-                  <p className="text-base">
-                    <strong className="text-primary">Geschätzter Verkehrswert:</strong>{' '}
-                    <span className="text-secondary font-bold">{response.price}</span>
+                <h3 className="fs-3 fw-bold text-dark mb-4">Ihre Bewertung</h3>
+                <div className="card p-4 mb-4" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+                  <p className="fs-5">
+                    <strong style={{ color: '#00C4B4' }}>Geschätzter Verkehrswert:</strong>{' '}
+                    <span style={{ color: '#FBBF24', fontWeight: 'bold' }}>{response.price}</span>
                   </p>
-                  <p className="text-base">
-                    <strong className="text-primary">Lagebewertung:</strong> {response.location}
+                  <p className="fs-5">
+                    <strong style={{ color: '#00C4B4' }}>Lagebewertung:</strong> {response.location}
                   </p>
-                  <p className="text-base">
-                    <strong className="text-primary">Zustand:</strong> {response.condition}
+                  <p className="fs-5">
+                    <strong style={{ color: '#00C4B4' }}>Zustand:</strong> {response.condition}
                   </p>
                 </div>
                 <motion.button
                   onClick={() => setCurrentStep(0)}
-                  className="mt-8 px-8 py-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 shadow-sm text-base font-medium"
-                  whileHover={{ scale: 1.05, backgroundColor: '#D1D5DB' }}
+                  className="btn btn-outline-secondary"
+                  style={{ padding: '12px 30px', fontSize: '16px', borderRadius: '8px' }}
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   Neue Bewertung starten
@@ -605,12 +618,14 @@ export default function PropertyEvaluationForm() {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mt-6 text-red-600 text-center text-sm"
+            className="mt-4 text-danger text-center"
+            style={{ fontSize: '14px' }}
           >
             {error}
             <button
               onClick={() => setCurrentStep(0)}
-              className="ml-2 text-primary underline hover:text-blue-900"
+              className="ms-2 text-primary text-decoration-underline"
+              style={{ color: '#00C4B4' }}
             >
               Zurück zum Anfang
             </button>
@@ -619,7 +634,7 @@ export default function PropertyEvaluationForm() {
       </div>
 
       {/* Footer */}
-      <footer className="mt-12 text-center text-xs text-gray-600">
+      <footer className="mt-4 text-center text-muted" style={{ fontSize: '12px' }}>
         Wir finanzieren diesen Service über die Provision unserer Immobilienprofis
       </footer>
     </div>
