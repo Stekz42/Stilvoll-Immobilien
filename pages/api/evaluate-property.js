@@ -26,6 +26,8 @@ export default async function handler(req, res) {
     usableArea,
     commercialUseType,
     constructionYear,
+    buildingMaterial,
+    valueAddedFeatures,
     plotSize,
     soilValue,
     developmentStatus,
@@ -55,6 +57,7 @@ export default async function handler(req, res) {
     amenitiesDistance,
     marketRent,
     capitalizationRate,
+    dsgvoAccepted,
   } = req.body;
 
   try {
@@ -73,6 +76,9 @@ export default async function handler(req, res) {
     }
     if (propertyType === 'gewerbe' && (!annualGrossRent || !operatingCosts || !commercialUseType)) {
       return res.status(400).json({ error: 'Pflichtfelder für Gewerbeimmobilie fehlen' });
+    }
+    if (!dsgvoAccepted) {
+      return res.status(400).json({ error: 'Datenschutzerklärung muss akzeptiert werden' });
     }
 
     // Daten für Bewertung formatieren mit sicherer Typkonvertierung
@@ -93,6 +99,8 @@ export default async function handler(req, res) {
       usableArea: parseInt(usableArea, 10) || 0,
       commercialUseType,
       constructionYear: parseInt(constructionYear, 10) || 2000,
+      buildingMaterial,
+      valueAddedFeatures: Array.isArray(valueAddedFeatures) ? valueAddedFeatures : [],
       plotSize: parseInt(plotSize, 10) || 0,
       soilValue: parseFloat(soilValue) || 370,
       developmentStatus,
@@ -122,6 +130,7 @@ export default async function handler(req, res) {
       amenitiesDistance,
       marketRent: parseFloat(marketRent) || 12,
       capitalizationRate: parseFloat(capitalizationRate) || 2.8,
+      dsgvoAccepted,
     };
 
     // Sachwertverfahren (primäres Verfahren für Einfamilienhäuser und Wohnungen)
@@ -139,12 +148,50 @@ export default async function handler(req, res) {
         ? 0.1
         : 0
       : 0;
-    const Alterswertminderung = (Alter / Gesamtnutzungsdauer) * (1 - Modernisierungsfaktor);
-    const SachwertGebäude = Normalherstellungskosten * (1 - Alterswertminderung);
+    const WertminderungProJahr = (propertyData.constructionYear >= 1900 && propertyData.constructionYear <= 1990) ? 0.015 : 0.0125; // 1,5 % für ältere Häuser, 1,25 % für neuere
+    const Alterswertminderung = (Alter * WertminderungProJahr) * (1 - Modernisierungsfaktor);
+    let SachwertGebäude = Normalherstellungskosten * (1 - Alterswertminderung);
+
+    // Bausubstanz-Faktor
+    let BausubstanzFaktor = 1.0;
+    if (propertyData.buildingMaterial === 'gemauert') {
+      BausubstanzFaktor = 1.1; // +10 %
+    } else if (propertyData.buildingMaterial === 'holzhaus') {
+      BausubstanzFaktor = 0.9; // -10 %
+    }
+    SachwertGebäude *= BausubstanzFaktor;
+
+    // Zustandsanpassung
+    let ZustandsFaktor = 1.0;
+    if (propertyData.sanitaryCondition === 'renovierungsbedürftig') {
+      ZustandsFaktor = 0.9; // -10 % bei Renovierungsbedarf
+    } else if (propertyData.sanitaryCondition === 'modern') {
+      ZustandsFaktor = 1.05; // +5 % bei modernem Zustand
+    }
+    SachwertGebäude *= ZustandsFaktor;
+
+    // Dachart-Anpassung
+    let DachartFaktor = 1.0;
+    if (propertyData.roofing === 'schraegesFlachdach') {
+      DachartFaktor = 1.02; // +2 % für modernes schräges Flachdach
+    }
+    SachwertGebäude *= DachartFaktor;
+
+    // Aufwertungskriterien für Einfamilienhäuser
+    let AufwertungsWert = 0;
+    if (propertyType === 'einfamilienhaus') {
+      if (propertyData.valueAddedFeatures.includes('pvAnlage')) AufwertungsWert += 15000;
+      if (propertyData.valueAddedFeatures.includes('pvSpeicher')) AufwertungsWert += 10000;
+      if (propertyData.valueAddedFeatures.includes('smartHome')) AufwertungsWert += 10000;
+      if (propertyData.valueAddedFeatures.includes('elektrischesGaragentor')) AufwertungsWert += 5000;
+      if (propertyData.valueAddedFeatures.includes('umzaeuntesGrundstueck')) AufwertungsWert += 5000;
+    }
+
     const SachwertGarage = propertyData.garage !== 'nein' ? propertyData.garageArea * 665.50 : 0;
     const AußenanlagenWert = propertyType !== 'gewerbe' ? propertyData.outdoorFacilities.length * 10000 : 0;
-    const VorläufigerSachwert = SachwertGebäude + SachwertGarage + AußenanlagenWert + Bodenwert;
-    const Marktanpassung = VorläufigerSachwert * 1.09;
+    const VorläufigerSachwert = SachwertGebäude + SachwertGarage + AußenanlagenWert + Bodenwert + AufwertungsWert;
+    const Marktanpassungsfaktor = (propertyData.constructionYear > 1990) ? 1.15 : 1.09; // +15 % für neuere Häuser, +9 % für ältere
+    const Marktanpassung = VorläufigerSachwert * Marktanpassungsfaktor;
     const AbschlagWegerecht = propertyData.encumbrances === 'ja' ? 1387.5 : 0;
     const VerkehrswertSachwert = Marktanpassung - AbschlagWegerecht;
 
@@ -160,7 +207,7 @@ export default async function handler(req, res) {
     const Jahresreinertrag = Jahresrohertrag - Bewirtschaftungskosten - Mietausfall;
     const Bodenwertverzinsung = Bodenwert * (propertyData.capitalizationRate / 100);
     const ReinertragGebäude = Jahresreinertrag - Bodenwertverzinsung;
-    const Vervielfältiger = propertyType === 'gewerbe' ? 20 : 28.52; // Gewerbe: niedrigerer Vervielfältiger
+        const Vervielfältiger = propertyType === 'gewerbe' ? 20 : 28.52; // Gewerbe: niedrigerer Vervielfältiger
     const ErtragswertGebäude = ReinertragGebäude * Vervielfältiger;
     const VerkehrswertErtrag = ErtragswertGebäude + Bodenwert - AbschlagWegerecht;
 
@@ -211,6 +258,9 @@ export default async function handler(req, res) {
     }
     if (propertyData.outdoorFacilities?.length > 0 && priceIncreaseFactors.length < 3) {
       priceIncreaseFactors.push(`Zusätzliche Außenanlagen (${propertyData.outdoorFacilities.join(', ')})`);
+    }
+    if (propertyData.valueAddedFeatures?.length > 0 && priceIncreaseFactors.length < 3) {
+      priceIncreaseFactors.push(`Zusätzliche Ausstattung (${propertyData.valueAddedFeatures.join(', ')})`);
     }
     while (priceIncreaseFactors.length < 3) {
       priceIncreaseFactors.push('Kein weiterer preissteigernder Faktor');
