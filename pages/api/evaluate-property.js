@@ -136,3 +136,65 @@ export default async function handler(req, res) {
     if (propertyData.repairBacklog) {
       Zustand += `, Reparaturstau: ${propertyData.repairBacklog}`;
     }
+    if (propertyData.energyCertificate === 'ja' && propertyData.energyClass) {
+      Zustand += `, Energieeffizienzklasse: ${propertyData.energyClass}`;
+    }
+
+    // Preissteigernde Faktoren
+    const priceIncreaseFactors = [];
+    if (propertyData.publicTransportDistance && parseFloat(propertyData.publicTransportDistance) <= 1) {
+      priceIncreaseFactors.push('Hervorragende Anbindung an öffentliche Verkehrsmittel');
+    }
+    if (propertyData.equipmentLevel === 'gehoben') {
+      priceIncreaseFactors.push('Gehobene Ausstattung');
+    }
+    if (propertyData.lastModernization && (2025 - propertyData.lastModernization) <= 10) {
+      priceIncreaseFactors.push('Kürzliche Modernisierung in den letzten 10 Jahren');
+    }
+    if (propertyData.livingArea > 150) {
+      priceIncreaseFactors.push('Große Wohnfläche über 150 m²');
+    }
+    if (propertyData.outdoorFacilities.length > 0) {
+      priceIncreaseFactors.push(`Zusätzliche Außenanlagen (${propertyData.outdoorFacilities.join(', ')})`);
+    }
+    // Fülle auf 5 Faktoren auf, falls weniger vorhanden
+    while (priceIncreaseFactors.length < 5) {
+      priceIncreaseFactors.push('Kein weiterer preissteigernder Faktor');
+    }
+
+    // Preissenkende Faktoren
+    const priceDecreaseFactors = [];
+    if (propertyData.floodRisk === 'ja') {
+      priceDecreaseFactors.push('Lage in einem Überschwemmungsgebiet');
+    }
+    if (propertyData.sanitaryCondition === 'renovierungsbedürftig') {
+      priceDecreaseFactors.push('Renovierungsbedürftige Sanitäranlagen');
+    }
+    if (propertyData.repairBacklog) {
+      priceDecreaseFactors.push('Vorhandener Reparaturstau');
+    }
+    if (propertyData.constructionYear < 1970) {
+      priceDecreaseFactors.push('Älteres Baujahr (vor 1970)');
+    }
+    if (propertyData.encumbrances === 'ja') {
+      priceDecreaseFactors.push('Grundbuchliche Belastungen (z. B. Wegerecht)');
+    }
+    // Fülle auf 5 Faktoren auf, falls weniger vorhanden
+    while (priceDecreaseFactors.length < 5) {
+      priceDecreaseFactors.push('Kein weiterer preissenkender Faktor');
+    }
+
+    const evaluation = {
+      price: `${Verkehrswert.toLocaleString('de-DE')} €`,
+      location: Lagebewertung,
+      condition: Zustand,
+      priceIncreaseFactors,
+      priceDecreaseFactors,
+    };
+
+    res.status(200).json(evaluation);
+  } catch (error) {
+    console.error('Fehler:', error.message);
+    res.status(500).json({ error: 'Fehler bei der Bewertung: ' + error.message });
+  }
+}
