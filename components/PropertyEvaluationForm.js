@@ -16,14 +16,15 @@ export default function PropertyEvaluationForm() {
       city: '',
       zipCode: '',
       propertyType: 'einfamilienhaus',
-      numberOfUnits: '', // Für Mehrfamilienhäuser
-      annualGrossRent: '', // Für Mehrfamilienhäuser und Gewerbe
-      operatingCosts: '', // Für Mehrfamilienhäuser und Gewerbe
-      vacancyRate: '', // Für Mehrfamilienhäuser
-      commercialUseType: '', // Für Gewerbeimmobilien
-      usableArea: '', // Für Gewerbeimmobilien
+      numberOfUnits: '',
+      annualGrossRent: '',
+      operatingCosts: '',
+      vacancyRate: '',
+      usableArea: '',
+      commercialUseType: '',
       constructionYear: '',
-      evaluationPurpose: 'verkauf',
+      buildingMaterial: 'gemauert',
+      valueAddedFeatures: [],
       plotSize: '',
       soilValue: '',
       developmentStatus: 'vollständig',
@@ -53,13 +54,15 @@ export default function PropertyEvaluationForm() {
       amenitiesDistance: '',
       marketRent: '',
       capitalizationRate: '',
+      dsgvoAccepted: false, // Neues Feld für DSGVO-Bestätigung
     };
   });
-  const [currentStep, setCurrentStep] = useState(-1); // Start bei -1 für Begrüßungskachel
+  const [currentStep, setCurrentStep] = useState(-1);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showDsgvoModal, setShowDsgvoModal] = useState(false); // Für DSGVO-Modal
 
   useEffect(() => {
     localStorage.setItem('formData', JSON.stringify(formData));
@@ -90,7 +93,7 @@ export default function PropertyEvaluationForm() {
           type: 'select',
           options: [
             { value: 'einfamilienhaus', label: 'Einfamilienhaus' },
-            { value: 'mehrfamilienhaus', label: 'Mehrfamilienhaus' }, // Neue Option
+            { value: 'mehrfamilienhaus', label: 'Mehrfamilienhaus' },
             { value: 'wohnung', label: 'Wohnung' },
             { value: 'gewerbe', label: 'Gewerbe' },
           ],
@@ -116,6 +119,23 @@ export default function PropertyEvaluationForm() {
       title: 'Spezifische Informationen',
       icon: <FaBuilding />,
       fields: [
+        // Dynamische Felder für Einfamilienhäuser
+        ...(formData.propertyType === 'einfamilienhaus' ? [
+          {
+            name: 'valueAddedFeatures',
+            label: 'Zusätzliche Ausstattung',
+            type: 'checkbox',
+            options: [
+              { value: 'pvAnlage', label: 'PV-Anlage' },
+              { value: 'pvSpeicher', label: 'PV-Speicher' },
+              { value: 'smartHome', label: 'Smart Home' },
+              { value: 'elektrischesGaragentor', label: 'Elektrisches Garagentor' },
+              { value: 'umzaeuntesGrundstueck', label: 'Umzäuntes Grundstück' },
+            ],
+            section: 'Einfamilienhaus',
+            description: 'Wählen Sie alle zutreffenden Ausstattungsmerkmale aus.',
+          },
+        ] : []),
         // Dynamische Felder für Mehrfamilienhäuser
         ...(formData.propertyType === 'mehrfamilienhaus' ? [
           { name: 'numberOfUnits', label: 'Anzahl der Wohneinheiten', type: 'number', required: true, section: 'Mehrfamilienhaus', description: 'Geben Sie die Anzahl der Wohneinheiten ein (z. B. 3).' },
@@ -143,7 +163,7 @@ export default function PropertyEvaluationForm() {
           { name: 'annualGrossRent', label: 'Jahresbruttomiete (€)', type: 'number', required: true, section: 'Gewerbeimmobilie', description: 'Geben Sie die gesamte Jahresbruttomiete ein (z. B. 50.000 €).' },
           { name: 'operatingCosts', label: 'Bewirtschaftungskosten (€/Jahr)', type: 'number', required: true, section: 'Gewerbeimmobilie', description: 'Geben Sie die jährlichen Bewirtschaftungskosten ein (z. B. 8.000 €).' },
         ] : []),
-      ].filter(field => field), // Entfernt leere Felder
+      ].filter(field => field),
     },
     {
       title: 'Grundstück',
@@ -243,9 +263,22 @@ export default function PropertyEvaluationForm() {
               { value: 'satteldach', label: 'Satteldach' },
               { value: 'flachdach', label: 'Flachdach' },
               { value: 'walmdach', label: 'Walmdach' },
+              { value: 'schraegesFlachdach', label: 'Schräges Flachdach' },
             ],
             section: 'Gebäudedetails',
             description: 'Wählen Sie den Typ der Bedachung aus (z. B. Satteldach).',
+          },
+          {
+            name: 'buildingMaterial',
+            label: 'Bausubstanz',
+            type: 'select',
+            options: [
+              { value: 'gemauert', label: 'Gemauert' },
+              { value: 'fertighaus', label: 'Fertighaus' },
+              { value: 'holzhaus', label: 'Holzhaus' },
+            ],
+            section: 'Gebäudedetails',
+            description: 'Wählen Sie die Bausubstanz des Hauses aus.',
           },
         ] : []),
         {
@@ -398,12 +431,16 @@ export default function PropertyEvaluationForm() {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === 'checkbox') {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: checked
-          ? [...prev[name], value]
-          : prev[name].filter((item) => item !== value),
-      }));
+      if (name === 'dsgvoAccepted') {
+        setFormData((prev) => ({ ...prev, [name]: checked }));
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          [name]: checked
+            ? [...prev[name], value]
+            : prev[name].filter((item) => item !== value),
+        }));
+      }
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
       if (fieldErrors[name]) {
@@ -413,7 +450,6 @@ export default function PropertyEvaluationForm() {
   };
 
   const downloadFormDataAsText = () => {
-    // Formulardaten formatieren
     let textContent = '=== Immobilienbewertung ===\n\n';
     textContent += 'Persönliche Daten:\n';
     textContent += `Vorname: ${formData.firstName}\n`;
@@ -423,12 +459,11 @@ export default function PropertyEvaluationForm() {
     textContent += `E-Mail-Adresse: ${formData.email}\n`;
     textContent += '\nEingegebene Daten:\n';
     for (const [key, value] of Object.entries(formData)) {
-      if (!['firstName', 'lastName', 'addressPersonal', 'phone', 'email'].includes(key)) {
+      if (!['firstName', 'lastName', 'addressPersonal', 'phone', 'email', 'dsgvoAccepted'].includes(key)) {
         textContent += `${key}: ${Array.isArray(value) ? value.join(', ') : value}\n`;
       }
     }
 
-    // Auswertung hinzufügen, falls vorhanden
     if (response) {
       textContent += '\nAuswertung:\n';
       textContent += `Geschätzter Verkehrswert: ${response.price}\n`;
@@ -440,7 +475,7 @@ export default function PropertyEvaluationForm() {
         textContent += `Sachwert des Gebäudes: ${response.breakdown.SachwertGebäude || 'Nicht verfügbar'} €\n`;
         textContent += `Sachwert der Garage: ${response.breakdown.SachwertGarage || 'Nicht verfügbar'} €\n`;
         textContent += `Wert der Außenanlagen: ${response.breakdown.AußenanlagenWert || 'Nicht verfügbar'} €\n`;
-        textContent += `Marktanpassung: +${response.breakdown.Marktanpassung || 'Nicht verfügbar'} €\n`;
+        textContent += `Marktanpassung: ${parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? '+' : '-'}${Math.abs(parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.'))).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €\n`;
         textContent += `Abschlag (Wegerecht): -${response.breakdown.AbschlagWegerecht || 'Nicht verfügbar'} €\n`;
       }
       textContent += '\nPreissteigernde Faktoren:\n';
@@ -453,7 +488,6 @@ export default function PropertyEvaluationForm() {
       });
     }
 
-    // Textdokument erstellen und herunterladen
     const blob = new Blob([textContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -468,6 +502,10 @@ export default function PropertyEvaluationForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateStep()) return;
+    if (!formData.dsgvoAccepted) {
+      setError('Bitte akzeptieren Sie die Datenschutzerklärung, um fortzufahren.');
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -603,9 +641,28 @@ export default function PropertyEvaluationForm() {
           </motion.div>
         ) : field.type === 'checkbox' ? (
           <div className="d-flex flex-column gap-2">
-            {field.options.map((option) => (
+            {field.options ? (
+              field.options.map((option) => (
+                <motion.label
+                  key={option.value}
+                  className="form-check-label d-flex align-items-center"
+                  style={{ cursor: 'pointer' }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <input
+                    type="checkbox"
+                    name={field.name}
+                    value={option.value}
+                    checked={formData[field.name].includes(option.value)}
+                    onChange={handleChange}
+                    className="form-check-input me-2"
+                    style={{ width: '20px', height: '20px' }}
+                  />
+                  <span style={{ fontSize: '16px', color: '#333' }}>{option.label}</span>
+                </motion.label>
+              ))
+            ) : (
               <motion.label
-                key={option.value}
                 className="form-check-label d-flex align-items-center"
                 style={{ cursor: 'pointer' }}
                 whileHover={{ scale: 1.02 }}
@@ -613,15 +670,20 @@ export default function PropertyEvaluationForm() {
                 <input
                   type="checkbox"
                   name={field.name}
-                  value={option.value}
-                  checked={formData[field.name].includes(option.value)}
+                  checked={formData[field.name]}
                   onChange={handleChange}
-                  className="form-check-input me-2"
+                  className={`form-check-input me-2 ${hasError ? 'is-invalid' : ''}`}
                   style={{ width: '20px', height: '20px' }}
+                  required={field.required}
                 />
-                <span style={{ fontSize: '16px', color: '#333' }}>{option.label}</span>
+                <span style={{ fontSize: '16px', color: '#333' }}>{field.label}</span>
               </motion.label>
-            ))}
+            )}
+            {hasError && (
+              <div className="invalid-feedback" style={{ display: 'block', fontSize: '14px' }}>
+                {hasError}
+              </div>
+            )}
             {field.description && (
               <small className="d-block text-muted mt-1" style={{ fontSize: '12px' }}>
                 {field.description}
@@ -633,7 +695,6 @@ export default function PropertyEvaluationForm() {
     );
   };
 
-  // Berechne den Fortschritt, begrenze ihn auf 100 %
   const progressPercentage = Math.min((currentStep >= 0 ? currentStep / (steps.length - 1) : 0) * 100, 100);
 
   return (
@@ -693,9 +754,9 @@ export default function PropertyEvaluationForm() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
-              className="text-center"
+              className="d-flex align-items-center justify-content-center min-vh-100"
             >
-              <div className="card p-5 mb-4" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+              <div className="card p-5 text-center" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', maxWidth: '500px', width: '100%' }}>
                 <h2 className="fs-3 fw-bold text-dark mb-3">Herzlich willkommen bei Stilvoll Immobilien</h2>
                 <p className="fs-5 text-muted mb-4">
                   Bewerten Sie heute kostenlos Ihre Immobilie datenbasiert in unserem Online-Tool
@@ -751,24 +812,61 @@ export default function PropertyEvaluationForm() {
                     Zurück
                   </motion.button>
                 )}
-                <motion.button
-                  type={currentStep === steps.length - 1 ? 'submit' : 'button'}
-                  onClick={currentStep < steps.length - 1 ? nextStep : undefined}
-                  className="btn btn-outline-secondary d-flex align-items-center justify-content-center"
-                  style={{ padding: '12px 30px', fontSize: '16px', borderRadius: '8px' }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <svg className="spinner-border spinner-border-sm me-2" role="status" style={{ width: '20px', height: '20px' }}>
-                      <span className="visually-hidden">Loading...</span>
-                    </svg>
-                  ) : null}
-                  {currentStep === steps.length - 1 ? 'Bewertung anfordern' : 'Weiter'}
-                </motion.button>
+                {currentStep === steps.length - 1 ? (
+                  <>
+                    <div className="d-flex flex-column align-items-center gap-2">
+                      <motion.button
+                        type="button"
+                        onClick={() => setShowDsgvoModal(true)}
+                        className="btn btn-outline-info"
+                        style={{ padding: '12px 30px', fontSize: '16px', borderRadius: '8px' }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        Datenschutzerklärung anzeigen
+                      </motion.button>
+                      {renderField({
+                        name: 'dsgvoAccepted',
+                        label: 'Ich stimme der Datenschutzerklärung zu',
+                        type: 'checkbox',
+                        required: true,
+                      })}
+                      <motion.button
+                        type="submit"
+                        className="btn btn-outline-secondary d-flex align-items-center justify-content-center"
+                        style={{ padding: '12px 30px', fontSize: '16px', borderRadius: '8px' }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        disabled={isLoading || !formData.dsgvoAccepted}
+                      >
+                        {isLoading ? (
+                          <svg className="spinner-border spinner-border-sm me-2" role="status" style={{ width: '20px', height: '20px' }}>
+                            <span className="visually-hidden">Loading...</span>
+                          </svg>
+                        ) : null}
+                        Bewertung anfordern
+                      </motion.button>
+                    </div>
+                  </>
+                ) : (
+                  <motion.button
+                    type="button"
+                    onClick={nextStep}
+                    className="btn btn-outline-secondary d-flex align-items-center justify-content-center"
+                    style={{ padding: '12px 30px', fontSize: '16px', borderRadius: '8px' }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <svg className="spinner-border spinner-border-sm me-2" role="status" style={{ width: '20px', height: '20px' }}>
+                        <span className="visually-hidden">Loading...</span>
+                      </svg>
+                    ) : null}
+                    Weiter
+                  </motion.button>
+                )}
               </div>
-              {/* Terminanfrage-Button */}
               <div className="mt-4">
                 <a
                   href="https://wa.me/message/ZAG46FMPWMZ5G1"
@@ -824,10 +922,10 @@ export default function PropertyEvaluationForm() {
                           </tr>
                           <tr>
                             <td>Marktanpassung</td>
-                           <td className={parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? 'text-success' : 'text-danger'}>
-  {parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? '+' : '-'}
-  {Math.abs(parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.'))).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
-</td>
+                            <td className={parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? 'text-success' : 'text-danger'}>
+                              {parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? '+' : '-'}
+                              {Math.abs(parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.'))).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                            </td>
                           </tr>
                           <tr>
                             <td>Abschlag (Wegerecht)</td>
@@ -897,7 +995,59 @@ export default function PropertyEvaluationForm() {
         )}
       </div>
 
-      {/* Footer */}
+      {/* DSGVO Modal */}
+      {showDsgvoModal && (
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex="-1" role="dialog">
+          <div className="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Datenschutzerklärung</h5>
+                <button type="button" className="btn-close" onClick={() => setShowDsgvoModal(false)} aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                <h6>Datenschutzerklärung</h6>
+                <p>
+                  Wir, Stilvoll Immobilien, nehmen den Schutz Ihrer persönlichen Daten sehr ernst. Ihre Daten werden gemäß den Bestimmungen der Datenschutz-Grundverordnung (DSGVO) und anderer relevanter Datenschutzgesetze verarbeitet.
+                </p>
+                <h6>1. Verantwortlicher</h6>
+                <p>
+                  Verantwortlicher im Sinne der DSGVO ist:<br />
+                  T. Kacemer<br />
+                  Wallstraße 30<br />
+                  40882 Ratingen<br />
+                  E-Mail: info@stilvoll-immobilien.de
+                </p>
+                <h6>2. Erhebung und Verarbeitung Ihrer Daten</h6>
+                <p>
+                  Wir erheben und verarbeiten Ihre personenbezogenen Daten (z. B. Name, Anschrift, Telefonnummer, E-Mail-Adresse), die Sie uns im Rahmen der Immobilienbewertung übermitteln, um Ihre Anfrage zu bearbeiten und die Bewertung durchzuführen.
+                </p>
+                <h6>3. Zweck der Datenverarbeitung</h6>
+                <p>
+                  Die Verarbeitung Ihrer Daten erfolgt zur Erbringung unserer Dienstleistung (Immobilienbewertung) und zur Kontaktaufnahme im Rahmen Ihrer Anfrage. Eine Weitergabe Ihrer Daten an Dritte erfolgt nicht, außer wenn dies gesetzlich vorgeschrieben ist.
+                </p>
+                <h6>4. Ihre Rechte</h6>
+                <p>
+                  Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Widerspruch gegen die Verarbeitung sowie das Recht auf Datenübertragbarkeit. Bitte kontaktieren Sie uns hierzu unter der oben genannten Adresse.
+                </p>
+                <h6>5. Speicherdauer</h6>
+                <p>
+                  Ihre Daten werden nur so lange gespeichert, wie es für die Erfüllung des Zwecks erforderlich ist oder gesetzliche Aufbewahrungsfristen bestehen.
+                </p>
+                <h6>6. Einwilligung</h6>
+                <p>
+                  Mit der Nutzung unseres Online-Tools erklären Sie sich mit der Verarbeitung Ihrer Daten gemäß dieser Datenschutzerklärung einverstanden.
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowDsgvoModal(false)}>
+                  Schließen
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <footer className="mt-4 text-center text-muted" style={{ fontSize: '12px' }}>
         Wir finanzieren diesen Service über die Provision unserer Immobilienprofis
       </footer>
