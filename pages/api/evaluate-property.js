@@ -100,7 +100,7 @@ export default async function handler(req, res) {
     // E-Mail senden
     const msg = {
       to: 'info@konzept-stilvoll.de',
-      from: 'noreply@stilvoll-immobilien.de', // Ersetze dies mit der verifizierten Absender-E-Mail-Adresse aus SendGrid
+      from: 'info@stilvoll-immobilien.com', // Ersetze dies mit deiner verifizierten E-Mail-Adresse
       subject: 'Neue Immobilienbewertung',
       text: `Eine neue Bewertung wurde eingereicht:\n\n${JSON.stringify(propertyData, null, 2)}`,
     };
@@ -141,4 +141,37 @@ export default async function handler(req, res) {
     const Verkehrswert = Math.round(VerkehrswertSachwert / 1000) * 1000;
 
     // Lagebewertung
-    let Lagebewertung = `Lage in ${city}: ${localLocation || 'Ruhige Wohnlage
+    let Lagebewertung = `Lage in ${city}: ${localLocation || 'Ruhige Wohnlage'}`;
+    if (propertyData.floodRisk === 'ja') {
+      Lagebewertung += ', jedoch in einem Überschwemmungsgebiet (Wertminderung möglich)';
+    }
+    if (propertyData.publicTransportDistance && parseFloat(propertyData.publicTransportDistance) <= 1) {
+      Lagebewertung += ', hervorragende Anbindung an öffentliche Verkehrsmittel';
+    } else if (propertyData.publicTransportDistance && parseFloat(propertyData.publicTransportDistance) > 3) {
+      Lagebewertung += ', eingeschränkte Anbindung an öffentliche Verkehrsmittel';
+    }
+
+    // Zustandsbewertung
+    let Zustand = `Zustand: ${propertyData.sanitaryCondition}`;
+    if (propertyData.modernizationDetails) {
+      Zustand += `, Modernisierungen: ${propertyData.modernizationDetails}`;
+    }
+    if (propertyData.repairBacklog) {
+      Zustand += `, Reparaturstau: ${propertyData.repairBacklog}`;
+    }
+    if (propertyData.energyCertificate === 'ja' && propertyData.energyClass) {
+      Zustand += `, Energieeffizienzklasse: ${propertyData.energyClass}`;
+    }
+
+    const evaluation = {
+      price: `${Verkehrswert.toLocaleString('de-DE')} €`,
+      location: Lagebewertung,
+      condition: Zustand,
+    };
+
+    res.status(200).json({ evaluation });
+  } catch (error) {
+    console.error('Fehler:', error.message);
+    res.status(500).json({ error: 'Fehler bei der Bewertung oder beim Senden der E-Mail' });
+  }
+}
