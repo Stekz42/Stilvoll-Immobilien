@@ -1,6 +1,7 @@
 // components/PropertyEvaluationForm.js
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FaHome, FaLandmark, FaBuilding, FaTools, FaMap, FaChartLine } from 'react-icons/fa';
 
 export default function PropertyEvaluationForm() {
   const [formData, setFormData] = useState({
@@ -47,6 +48,7 @@ export default function PropertyEvaluationForm() {
   const steps = [
     {
       title: 'Allgemeine Informationen',
+      icon: <FaHome />,
       fields: [
         { name: 'address', label: 'Adresse (Straße, Hausnummer)', type: 'text', required: true },
         { name: 'city', label: 'Stadt', type: 'text', required: true },
@@ -76,6 +78,7 @@ export default function PropertyEvaluationForm() {
     },
     {
       title: 'Grundstück',
+      icon: <FaLandmark />,
       fields: [
         { name: 'plotSize', label: 'Grundstücksgröße (m²)', type: 'number', required: true },
         {
@@ -135,6 +138,7 @@ export default function PropertyEvaluationForm() {
     },
     {
       title: 'Gebäude und bauliche Anlagen',
+      icon: <FaBuilding />,
       fields: [
         { name: 'livingArea', label: 'Wohnfläche (m²)', type: 'number', required: true },
         { name: 'rooms', label: 'Anzahl der Zimmer', type: 'number', required: true },
@@ -213,6 +217,7 @@ export default function PropertyEvaluationForm() {
     },
     {
       title: 'Modernisierungen und Zustand',
+      icon: <FaTools />,
       fields: [
         { name: 'lastModernization', label: 'Jahr der letzten Modernisierung', type: 'number' },
         { name: 'modernizationDetails', label: 'Details zu Modernisierungen', type: 'textarea' },
@@ -240,6 +245,7 @@ export default function PropertyEvaluationForm() {
     },
     {
       title: 'Lage und Infrastruktur',
+      icon: <FaMap />,
       fields: [
         { name: 'localLocation', label: 'Beschreibung der lokalen Lage', type: 'textarea' },
         {
@@ -256,6 +262,7 @@ export default function PropertyEvaluationForm() {
     },
     {
       title: 'Markt- und Ertragsdaten',
+      icon: <FaChartLine />,
       fields: [
         {
           name: 'marketRent',
@@ -319,15 +326,15 @@ export default function PropertyEvaluationForm() {
         return (
           <motion.div
             className="relative"
-            whileHover={{ scale: 1.01 }}
-            whileFocus={{ scale: 1.01 }}
+            whileHover={{ scale: 1.02 }}
+            whileFocus={{ scale: 1.02 }}
           >
             <input
               type={field.type}
               name={field.name}
               value={formData[field.name]}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 shadow-sm"
+              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 bg-white shadow-sm"
               placeholder={field.label}
               required={field.required}
             />
@@ -347,8 +354,8 @@ export default function PropertyEvaluationForm() {
             name={field.name}
             value={formData[field.name]}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 shadow-sm"
-            whileHover={{ scale: 1.01 }}
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 bg-white shadow-sm"
+            whileHover={{ scale: 1.02 }}
           >
             {field.options.map((option) => (
               <option key={option.value} value={option.value}>
@@ -363,10 +370,10 @@ export default function PropertyEvaluationForm() {
             name={field.name}
             value={formData[field.name]}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 shadow-sm"
+            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 bg-white shadow-sm"
             rows="4"
             placeholder={field.label}
-            whileHover={{ scale: 1.01 }}
+            whileHover={{ scale: 1.02 }}
           />
         );
       case 'checkbox':
@@ -399,33 +406,33 @@ export default function PropertyEvaluationForm() {
   return (
     <div className="min-h-screen bg-neutral flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-inter">
       <motion.div
-        className="max-w-4xl w-full bg-white shadow-2xl rounded-2xl p-8"
-        initial={{ opacity: 0, y: 20 }}
+        className="max-w-4xl w-full bg-white shadow-card rounded-2xl p-8"
+        initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
       >
-        <h2 className="text-3xl font-bold text-primary mb-6 text-center">
-          Immobilienbewertung - Stilvoll Immobilien
+        <h2 className="text-3xl font-bold text-primary mb-6 text-center flex items-center justify-center gap-2">
+          <FaHome className="text-secondary" /> Immobilienbewertung - Stilvoll Immobilien
         </h2>
 
         {/* Fortschrittsanzeige */}
         <div className="mb-8">
-          <div className="flex justify-between mb-2">
+          <div className="flex justify-between mb-4">
             {steps.map((step, index) => (
               <div
                 key={index}
-                className={`flex-1 text-center text-sm font-medium ${
+                className={`flex-1 text-center text-sm font-medium flex flex-col items-center ${
                   index <= currentStep ? 'text-primary' : 'text-gray-400'
                 }`}
               >
                 <motion.div
-                  className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center ${
+                  className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
                     index <= currentStep ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
                   }`}
-                  animate={{ scale: index === currentStep ? 1.2 : 1 }}
-                  transition={{ duration: 0.3 }}
+                  animate={{ scale: index === currentStep ? 1.2 : 1, rotate: index === currentStep ? 360 : 0 }}
+                  transition={{ duration: 0.5 }}
                 >
-                  {index + 1}
+                  {step.icon}
                 </motion.div>
                 {step.title}
               </div>
@@ -436,7 +443,7 @@ export default function PropertyEvaluationForm() {
               className="bg-primary h-2 rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
             />
           </div>
         </div>
@@ -445,23 +452,31 @@ export default function PropertyEvaluationForm() {
           {currentStep < steps.length ? (
             <motion.form
               key={currentStep}
-              initial={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: 100 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.3 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
               onSubmit={currentStep === steps.length - 1 ? handleSubmit : (e) => e.preventDefault()}
               className="space-y-6"
             >
-              <h3 className="text-xl font-semibold text-primary">{steps[currentStep].title}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <h3 className="text-xl font-semibold text-primary flex items-center gap-2">
+                {steps[currentStep].icon} {steps[currentStep].title}
+              </h3>
+              <div className="space-y-6">
                 {steps[currentStep].fields.map((field) => (
-                  <div key={field.name} className="group">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <motion.div
+                    key={field.name}
+                    className="bg-white p-4 rounded-lg shadow-card border border-gray-100 group"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                  >
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       {field.label}
                       {field.required && <span className="text-red-500">*</span>}
                     </label>
                     {renderField(field)}
-                  </div>
+                  </motion.div>
                 ))}
               </div>
               <div className="flex justify-between mt-8">
@@ -469,8 +484,8 @@ export default function PropertyEvaluationForm() {
                   <motion.button
                     type="button"
                     onClick={prevStep}
-                    className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-all duration-300 shadow-sm"
-                    whileHover={{ scale: 1.05 }}
+                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 shadow-sm"
+                    whileHover={{ scale: 1.05, backgroundColor: '#D1D5DB' }}
                     whileTap={{ scale: 0.95 }}
                   >
                     Zurück
@@ -479,8 +494,8 @@ export default function PropertyEvaluationForm() {
                 <motion.button
                   type={currentStep === steps.length - 1 ? 'submit' : 'button'}
                   onClick={currentStep < steps.length - 1 ? nextStep : undefined}
-                  className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-800 transition-all duration-300 shadow-sm"
-                  whileHover={{ scale: 1.05 }}
+                  className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-green-800 transition-all duration-300 shadow-sm"
+                  whileHover={{ scale: 1.05, backgroundColor: '#166534' }}
                   whileTap={{ scale: 0.95 }}
                 >
                   {currentStep === steps.length - 1 ? 'Bewertung anfordern' : 'Weiter'}
@@ -490,27 +505,29 @@ export default function PropertyEvaluationForm() {
           ) : (
             response && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
                 className="text-center"
               >
-                <h3 className="text-2xl font-semibold text-primary mb-4">Ihre Bewertung</h3>
-                <div className="bg-neutral p-6 rounded-lg space-y-4 shadow-sm">
+                <h3 className="text-2xl font-semibold text-primary mb-4 flex items-center justify-center gap-2">
+                  <FaChartLine className="text-secondary" /> Ihre Bewertung
+                </h3>
+                <div className="bg-accent p-6 rounded-lg space-y-4 shadow-card">
                   <p className="text-lg">
-                    <strong>Preis:</strong> {response.price}
+                    <strong className="text-primary">Preis:</strong> {response.price}
                   </p>
                   <p className="text-lg">
-                    <strong>Lage:</strong> {response.location}
+                    <strong className="text-primary">Lage:</strong> {response.location}
                   </p>
                   <p className="text-lg">
-                    <strong>Zustand:</strong> {response.condition}
+                    <strong className="text-primary">Zustand:</strong> {response.condition}
                   </p>
                 </div>
                 <motion.button
                   onClick={() => setCurrentStep(0)}
-                  className="mt-6 px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-800 transition-all duration-300 shadow-sm"
-                  whileHover={{ scale: 1.05 }}
+                  className="mt-6 px-6 py-2 bg-primary text-white rounded-lg hover:bg-green-800 transition-all duration-300 shadow-sm"
+                  whileHover={{ scale: 1.05, backgroundColor: '#166534' }}
                   whileTap={{ scale: 0.95 }}
                 >
                   Neue Bewertung
