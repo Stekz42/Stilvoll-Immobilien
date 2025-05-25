@@ -7,8 +7,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#003087', // Tiefes Dunkelblau für Professionalität
-        secondary: '#FFD700', // Gold für Eleganz
+        primary: '#1E40AF', // Weicherer Blauton für Professionalität
+        secondary: '#FBBF24', // Weicherer Goldton für Eleganz
         neutral: '#FFFFFF', // Weiß für Klarheit
         accent: '#E5E7EB', // Hellgrau für Akzente
         background: '#F5F7FA', // Sehr helles Blau/Grau für den Hintergrund
