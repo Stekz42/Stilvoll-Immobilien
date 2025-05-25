@@ -364,13 +364,15 @@ export default function PropertyEvaluationForm() {
       textContent += `Geschätzter Verkehrswert: ${response.price}\n`;
       textContent += `Lagebewertung: ${response.location}\n`;
       textContent += `Zustand: ${response.condition}\n`;
-      textContent += '\nAufschlüsselung des Verkehrswerts:\n';
-      textContent += `Bodenwert: ${response.breakdown.Bodenwert} €\n`;
-      textContent += `Sachwert des Gebäudes: ${response.breakdown.SachwertGebäude} €\n`;
-      textContent += `Sachwert der Garage: ${response.breakdown.SachwertGarage} €\n`;
-      textContent += `Wert der Außenanlagen: ${response.breakdown.AußenanlagenWert} €\n`;
-      textContent += `Marktanpassung: +${response.breakdown.Marktanpassung} €\n`;
-      textContent += `Abschlag (Wegerecht): -${response.breakdown.AbschlagWegerecht} €\n`;
+      if (response.breakdown) {
+        textContent += '\nAufschlüsselung des Verkehrswerts:\n';
+        textContent += `Bodenwert: ${response.breakdown.Bodenwert || 'Nicht verfügbar'} €\n`;
+        textContent += `Sachwert des Gebäudes: ${response.breakdown.SachwertGebäude || 'Nicht verfügbar'} €\n`;
+        textContent += `Sachwert der Garage: ${response.breakdown.SachwertGarage || 'Nicht verfügbar'} €\n`;
+        textContent += `Wert der Außenanlagen: ${response.breakdown.AußenanlagenWert || 'Nicht verfügbar'} €\n`;
+        textContent += `Marktanpassung: +${response.breakdown.Marktanpassung || 'Nicht verfügbar'} €\n`;
+        textContent += `Abschlag (Wegerecht): -${response.breakdown.AbschlagWegerecht || 'Nicht verfügbar'} €\n`;
+      }
       textContent += '\nPreissteigernde Faktoren:\n';
       response.priceIncreaseFactors.forEach((factor, index) => {
         textContent += `${index + 1}. ${factor}\n`;
@@ -729,37 +731,43 @@ export default function PropertyEvaluationForm() {
                   <p className="fs-5">
                     <strong style={{ color: '#60C8E8' }}>Zustand:</strong> {response.condition}
                   </p>
+                  {response.breakdown ? (
+                    <div className="mt-4 text-start">
+                      <h5 className="fs-5 fw-semibold text-dark">Aufschlüsselung des Verkehrswerts:</h5>
+                      <table className="table table-bordered">
+                        <tbody>
+                          <tr>
+                            <td>Bodenwert</td>
+                            <td>{response.breakdown.Bodenwert} €</td>
+                          </tr>
+                          <tr>
+                            <td>Sachwert des Gebäudes</td>
+                            <td>{response.breakdown.SachwertGebäude} €</td>
+                          </tr>
+                          <tr>
+                            <td>Sachwert der Garage</td>
+                            <td>{response.breakdown.SachwertGarage} €</td>
+                          </tr>
+                          <tr>
+                            <td>Wert der Außenanlagen</td>
+                            <td>{response.breakdown.AußenanlagenWert} €</td>
+                          </tr>
+                          <tr>
+                            <td>Marktanpassung</td>
+                            <td>+{response.breakdown.Marktanpassung} €</td>
+                          </tr>
+                          <tr>
+                            <td>Abschlag (Wegerecht)</td>
+                            <td>-{response.breakdown.AbschlagWegerecht} €</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-muted mt-4">Aufschlüsselung des Verkehrswerts ist derzeit nicht verfügbar.</p>
+                  )}
                   <div className="mt-4 text-start">
-                    <h5 className="fs-5 fw-semibold text-dark">Aufschlüsselung des Verkehrswerts:</h5>
-                    <table className="table table-bordered">
-                      <tbody>
-                        <tr>
-                          <td>Bodenwert</td>
-                          <td>{response.breakdown.Bodenwert} €</td>
-                        </tr>
-                        <tr>
-                          <td>Sachwert des Gebäudes</td>
-                          <td>{response.breakdown.SachwertGebäude} €</td>
-                        </tr>
-                        <tr>
-                          <td>Sachwert der Garage</td>
-                          <td>{response.breakdown.SachwertGarage} €</td>
-                        </tr>
-                        <tr>
-                          <td>Wert der Außenanlagen</td>
-                          <td>{response.breakdown.AußenanlagenWert} €</td>
-                        </tr>
-                        <tr>
-                          <td>Marktanpassung</td>
-                          <td>+{response.breakdown.Marktanpassung} €</td>
-                        </tr>
-                        <tr>
-                          <td>Abschlag (Wegerecht)</td>
-                          <td>-{response.breakdown.AbschlagWegerecht} €</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                    <h5 className="fs-5 fw-semibold text-dark mt-3">Preissteigernde Faktoren:</h5>
+                    <h5 className="fs-5 fw-semibold text-dark">Preissteigernde Faktoren:</h5>
                     <ul className="list-group list-group-flush">
                       {response.priceIncreaseFactors.map((factor, index) => (
                         <li key={index} className="list-group-item">{factor}</li>
