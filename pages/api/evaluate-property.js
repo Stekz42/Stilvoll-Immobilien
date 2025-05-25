@@ -136,19 +136,3 @@ export default async function handler(req, res) {
     if (propertyData.repairBacklog) {
       Zustand += `, Reparaturstau: ${propertyData.repairBacklog}`;
     }
-    if (propertyData.energyCertificate === 'ja' && propertyData.energyClass) {
-      Zustand += `, Energieeffizienzklasse: ${propertyData.energyClass}`;
-    }
-
-    const evaluation = {
-      price: `${Verkehrswert.toLocaleString('de-DE')} €`,
-      location: Lagebewertung,
-      condition: Zustand,
-    };
-
-    res.status(200).json({ evaluation });
-  } catch (error) {
-    console.error('Fehler:', error.message);
-    res.status(500).json({ error: 'Fehler bei der Bewertung: ' + error.message });
-  }
-}
