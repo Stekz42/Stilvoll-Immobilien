@@ -397,22 +397,22 @@ export default function PropertyEvaluationForm() {
               name={field.name}
               value={formData[field.name]}
               onChange={handleChange}
-              className={`w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-neutral text-gray-800 placeholder-gray-400 text-sm ${
-                hasError ? 'border-red-500' : 'border-gray-300'
+              className={`w-full max-w-md p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 text-base shadow-sm ${
+                hasError ? 'border-red-500' : 'border-gray-200'
               }`}
               placeholder={field.label}
               required={field.required}
             />
             {formData[field.name] && !hasError && (
-              <FaCheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" />
+              <FaCheckCircle className="absolute right-4 top-1/2 transform -translate-y-1/2 text-primary" />
             )}
             {hasError && (
-              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500 text-xs">
+              <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-red-500 text-sm">
                 {hasError}
               </span>
             )}
             {field.tooltip && (
-              <div className="absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-help">
+              <div className="absolute right-12 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-help">
                 <span className="tooltip-text bg-gray-800 text-white text-xs rounded p-2 absolute z-10 hidden group-hover:block -top-10 right-0">
                   {field.tooltip}
                 </span>
@@ -425,8 +425,8 @@ export default function PropertyEvaluationForm() {
             name={field.name}
             value={formData[field.name]}
             onChange={handleChange}
-            className={`w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-neutral text-gray-800 text-sm ${
-              hasError ? 'border-red-500' : 'border-gray-300'
+            className={`w-full max-w-md p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-white text-gray-800 text-base shadow-sm ${
+              hasError ? 'border-red-500' : 'border-gray-200'
             }`}
             whileHover={{ scale: 1.02 }}
           >
@@ -441,8 +441,8 @@ export default function PropertyEvaluationForm() {
             name={field.name}
             value={formData[field.name]}
             onChange={handleChange}
-            className={`w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-neutral text-gray-800 placeholder-gray-400 text-sm ${
-              hasError ? 'border-red-500' : 'border-gray-300'
+            className={`w-full max-w-md p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:ring-opacity-50 focus:border-transparent transition-all duration-300 bg-white text-gray-800 placeholder-gray-400 text-base shadow-sm ${
+              hasError ? 'border-red-500' : 'border-gray-200'
             }`}
             rows="4"
             placeholder={field.label}
@@ -462,9 +462,9 @@ export default function PropertyEvaluationForm() {
                   value={option.value}
                   checked={formData[field.name].includes(option.value)}
                   onChange={handleChange}
-                  className="h-5 w-5 text-primary focus:ring-primary border-gray-300 rounded"
+                  className="h-5 w-5 text-primary focus:ring-primary border-gray-200 rounded"
                 />
-                <span className="ml-2 text-sm text-gray-700">{option.label}</span>
+                <span className="ml-2 text-base text-gray-700">{option.label}</span>
               </motion.label>
             ))}
           </div>
@@ -477,47 +477,28 @@ export default function PropertyEvaluationForm() {
     <div className="min-h-screen bg-background flex flex-col items-center justify-between py-16 px-4 sm:px-6 lg:px-8 font-roboto">
       <div className="max-w-5xl w-full">
         {/* Header */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-primary">Stilvoll Immobilien</h2>
-            <p className="text-lg text-gray-600">Immobilienbewertung</p>
+        <div className="flex items-center justify-between mb-8 px-4">
+          <div className="flex items-center">
+            <h2 className="text-xl font-bold text-primary">Stilvoll Immobilien</h2>
           </div>
+          <div className="text-sm text-gray-600">Die Nr. 1 für Immobilien.</div>
         </div>
 
-        {/* Fortschrittsanzeige (Inhaltsverzeichnis als Kacheln) */}
-        <div className="mb-12">
-          <div className="flex flex-wrap justify-center gap-4 mb-6">
-            {steps.map((step, index) => (
+        {/* Fortschrittsanzeige */}
+        <div className="flex justify-end mb-8">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-600">Bewertung</span>
+            <div className="w-32 bg-gray-200 rounded-full h-2">
               <motion.div
-                key={index}
-                onClick={() => handleStepClick(index)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer shadow-sm transition-all duration-300 ${
-                  index <= currentStep
-                    ? isStepCompleted(index)
-                      ? 'bg-green-500 text-white'
-                      : 'bg-primary text-white'
-                    : 'bg-gray-200 text-gray-600 cursor-not-allowed'
-                }`}
-                whileHover={{ scale: index <= currentStep || isStepCompleted(currentStep) ? 1.05 : 1 }}
-              >
-                {step.icon}
-                <span className="text-sm font-medium">{step.title}</span>
-                {isStepCompleted(index) && index < currentStep && (
-                  <FaCheckCircle className="text-white" />
-                )}
-              </motion.div>
-            ))}
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-3">
-            <motion.div
-              className="bg-primary h-3 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-              transition={{ duration: 0.8, ease: 'easeInOut' }}
-            />
-          </div>
-          <div className="text-center mt-2 text-sm text-gray-600">
-            Fortschritt: {Math.round(((currentStep + 1) / steps.length) * 100)}%
+                className="bg-primary h-2 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+                transition={{ duration: 0.8, ease: 'easeInOut' }}
+              />
+            </div>
+            <span className="text-sm font-medium text-gray-600">
+              {Math.round(((currentStep + 1) / steps.length) * 100)}%
+            </span>
           </div>
         </div>
 
@@ -530,34 +511,34 @@ export default function PropertyEvaluationForm() {
               exit={{ opacity: 0, x: -100 }}
               transition={{ duration: 0.8, ease: 'easeInOut' }}
               onSubmit={currentStep === steps.length - 1 ? handleSubmit : (e) => e.preventDefault()}
-              className="space-y-10"
+              className="space-y-10 flex flex-col items-center"
             >
-              <h3 className="text-lg font-bold text-primary flex items-center gap-2">
-                {steps[currentStep].icon} {steps[currentStep].title}
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                {steps[currentStep].title}
               </h3>
-              <div className="space-y-8">
+              <div className="space-y-8 w-full max-w-2xl">
                 {[...new Set(steps[currentStep].fields.map((field) => field.section))].map((section) => (
                   <div key={section} className="space-y-5">
-                    <h4 className="text-base font-semibold text-gray-700">{section}</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <h4 className="text-base font-semibold text-gray-700 text-center">{section}</h4>
+                    <div className="flex flex-col items-center gap-6">
                       {steps[currentStep].fields
                         .filter((field) => field.section === section)
                         .map((field) => (
-                          <div key={field.name}>
+                          <div key={field.name} className="w-full flex justify-center">
                             {renderField(field)}
                           </div>
                         ))}
                     </div>
-                    <hr className="border-t border-gray-300" />
+                    <hr className="border-t border-gray-200" />
                   </div>
                 ))}
               </div>
-              <div className="flex justify-between mt-12">
+              <div className="flex justify-center mt-12 gap-4">
                 {currentStep > 0 && (
                   <motion.button
                     type="button"
                     onClick={prevStep}
-                    className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-300 shadow-sm text-sm"
+                    className="px-8 py-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 shadow-sm text-base font-medium"
                     whileHover={{ scale: 1.05, backgroundColor: '#D1D5DB' }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -567,13 +548,13 @@ export default function PropertyEvaluationForm() {
                 <motion.button
                   type={currentStep === steps.length - 1 ? 'submit' : 'button'}
                   onClick={currentStep < steps.length - 1 ? nextStep : undefined}
-                  className="px-6 py-3 bg-primary text-white rounded-xl hover:bg-blue-900 transition-all duration-300 shadow-sm text-sm flex items-center justify-center"
-                  whileHover={{ scale: 1.05, backgroundColor: '#1E3A8A' }}
+                  className="px-8 py-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 shadow-sm text-base font-medium flex items-center justify-center"
+                  whileHover={{ scale: 1.05, backgroundColor: '#D1D5DB' }}
                   whileTap={{ scale: 0.95 }}
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                    <svg className="animate-spin h-5 w-5 mr-2 text-gray-700" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                     </svg>
@@ -590,7 +571,7 @@ export default function PropertyEvaluationForm() {
                 transition={{ duration: 0.8, ease: 'easeOut' }}
                 className="text-center"
               >
-                <h3 className="text-lg font-bold text-primary mb-6 flex items-center justify-center gap-2">
+                <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center justify-center gap-2">
                   <FaChartLine className="text-secondary" /> Ihre Bewertung
                 </h3>
                 <div className="bg-neutral p-8 rounded-xl space-y-6 shadow-card">
@@ -607,8 +588,8 @@ export default function PropertyEvaluationForm() {
                 </div>
                 <motion.button
                   onClick={() => setCurrentStep(0)}
-                  className="mt-8 px-6 py-3 bg-primary text-white rounded-xl hover:bg-blue-900 transition-all duration-300 shadow-sm text-sm"
-                  whileHover={{ scale: 1.05, backgroundColor: '#1E3A8A' }}
+                  className="mt-8 px-8 py-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all duration-300 shadow-sm text-base font-medium"
+                  whileHover={{ scale: 1.05, backgroundColor: '#D1D5DB' }}
                   whileTap={{ scale: 0.95 }}
                 >
                   Neue Bewertung starten
@@ -636,7 +617,7 @@ export default function PropertyEvaluationForm() {
 
       {/* Footer */}
       <footer className="mt-12 text-center text-xs text-gray-600">
-        Stilvoll Immobilien | info@stilvoll.de | +49 123 456789
+        Wir finanzieren diesen Service über die Provision unserer Immobilienprofis
       </footer>
     </div>
   );
