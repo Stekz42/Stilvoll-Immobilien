@@ -586,56 +586,50 @@ export default function PropertyEvaluationForm() {
     }, 30);
   };
 
-  const fetchGrokAnalysis = async () => {
-    setIsGrokLoading(true);
-    setGrokAnalysis('');
-    setError(null);
+const fetchGrokAnalysis = async () => {
+  setIsGrokLoading(true);
+  setGrokAnalysis('');
+  setError(null);
 
-    try {
-      const prompt = generatePrompt();
-      // Mock-Antwort
-      let grokResponse = `
-**Bewertung**: Die Immobilie mit einem Verkehrswert von ${response.price} besticht durch ihre Lage (${response.location}) und ihren Zustand (${response.condition}). Preissteigernde Faktoren wie ${response.priceIncreaseFactors.join(', ')} erhöhen den Wert, während Schwächen wie ${response.priceDecreaseFactors.join(', ')} durch gezielte Maßnahmen kompensierbar sind. Der Bodenwert (${response.breakdown.Bodenwert}) sichert langfristiges Potenzial.
+  try {
+    const prompt = generatePrompt();
+    const res = await fetch('https://api.x.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_GROK_API_KEY}`,
+      },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: 'Du bist ein erfahrener Immobilienexperte.' },
+          { role: 'user', content: prompt },
+        ],
+        model: 'grok-3-latest',
+        stream: false,
+        temperature: 0,
+      }),
+    });
 
-**Resümee**: Entdecken Sie Ihr neues Zuhause! Mit einem Verkehrswert von ${response.price} bietet diese Immobilie in ${response.location.split(': ')[0]} modernen Komfort und ${response.priceIncreaseFactors[0]?.toLowerCase() || 'attraktive Eigenschaften'}. Der Zustand (${response.condition.split(', ')[0]}) lädt zum sofortigen Einzug ein. Die Lage besticht durch ${response.location.split(', ')[1] || 'optimale Erreichbarkeit'}. Vereinbaren Sie eine Besichtigung und lassen Sie sich begeistern!
-      `;
-
-      // Echte API-Anfrage (auskommentiert, bis Endpunkt bestätigt)
-      /*
-      const res = await fetch('https://api.x.ai/v1/grok', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_GROK_API_KEY}`,
-        },
-        body: JSON.stringify({
-          prompt,
-          max_tokens: 500,
-          temperature: 0.7,
-        }),
-      });
-
-      if (!res.ok) {
-        if (res.status === 429) {
-          throw new Error('Rate Limit überschritten. Bitte warten Sie und versuchen Sie es später erneut.');
-        } else if (res.status === 401) {
-          throw new Error('Ungültiger API-Schlüssel. Bitte überprüfen Sie Ihren API-Schlüssel.');
-        } else {
-          throw new Error('Fehler bei der API-Anfrage: ' + res.statusText);
-        }
+    if (!res.ok) {
+      if (res.status === 429) {
+        throw new Error('Rate Limit überschritten. Bitte warten Sie und versuchen Sie es später erneut.');
+      } else if (res.status === 401) {
+        throw new Error('Ungültiger API-Schlüssel.');
+      } else {
+        throw new Error('Fehler bei der API-Anfrage: ' + res.statusText);
       }
-
-      const data = await res.json();
-      grokResponse = data.choices[0].text;
-      */
-
-      typeText(grokResponse, setGrokAnalysis);
-    } catch (err) {
-      setError('Fehler bei der Grok-Analyse: ' + err.message);
-    } finally {
-      setIsGrokLoading(false);
     }
-  };
+
+    const data = await res.json();
+    const grokResponse = data.choices[0].message.content;
+
+    typeText(grokResponse, setGrokAnalysis);
+  } catch (err) {
+    setError('Fehler bei der Grok-Analyse: ' + err.message);
+  } finally {
+    setIsGrokLoading(false);
+  }
+};
 
   const renderField = (field) => {
     const hasError = fieldErrors[field.name];
