@@ -558,21 +558,26 @@ export default function PropertyEvaluationForm() {
     return steps[stepIndex].fields.every((field) => !field.required || formData[field.name]);
   };
 
-  const generatePrompt = () => {
-    if (!response) return '';
+const generatePrompt = () => {
+  if (!response) return '';
 
-    return `
-      Du bist ein erfahrener Immobilienexperte. Analysiere die folgenden Immobiliendaten und gib eine fundierte Bewertung ab, die den Verkehrswert, die Lage, den Zustand sowie preissteigernde und -senkende Faktoren berücksichtigt. Hebe Stärken hervor und erkläre, wie sich Schwächen relativieren lassen. Erstelle anschließend ein optimistisches, professionelles Resümee, das als Beschreibungstext für die Immobilie auf Immobilienportalen dient. Der Text soll positiv formuliert sein, die Attraktivität der Immobilie betonen und potenzielle Käufer emotional ansprechen. Verwende einen einladenden, aber sachlichen Ton und begrenze das Resümee auf 150–200 Wörter.
+  // Sonderzeichen bereinigen
+  const cleanCondition = response.condition.replace(/\n/g, ', ');
+  const cleanOutdoorFacilities = formData.outdoorFacilities.join(', ');
 
-      Daten:
-      - Verkehrswert: ${response.price}
-      - Lage: ${response.location}
-      - Zustand: ${response.condition}
-      - Preissteigernde Faktoren: ${response.priceIncreaseFactors.join(', ')}
-      - Preissenkende Faktoren: ${response.priceDecreaseFactors.join(', ')}
-      - Zusätzliche Details: ${JSON.stringify(response.breakdown)}
-    `;
-  };
+  return `
+    Du bist ein erfahrener Immobilienexperte. Erstelle einen optimistischen, professionellen Beschreibungstext für die folgende Immobilie, der auf Immobilienportalen verwendet werden kann. Der Text soll die Attraktivität der Immobilie hervorheben, potenzielle Käufer emotional ansprechen und einen einladenden, aber sachlichen Ton haben. Begrenze den Text auf 100–120 Wörter, um Kosten zu sparen.
+
+    Daten:
+    - Verkehrswert: ${response.price}
+    - Lage: ${response.location}
+    - Zustand: ${cleanCondition}
+    - Wohnfläche: ${formData.livingArea} m²
+    - Grundstücksgröße: ${formData.plotSize} m²
+    - Baujahr: ${formData.constructionYear}
+    - Außenanlagen: ${cleanOutdoorFacilities}
+  `;
+};
 
   const typeText = (text, setText) => {
     let index = 0;
@@ -1042,7 +1047,7 @@ const fetchGrokAnalysis = async () => {
                         <span className="visually-hidden">Loading...</span>
                       </svg>
                     ) : null}
-                    Erweiterte Analyse und Expose erstellen
+                    KI Beschreibung generieren
                   </motion.button>
                   {grokAnalysis && (
                     <textarea
