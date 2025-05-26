@@ -55,6 +55,7 @@ export default function PropertyEvaluationForm() {
       marketRent: '',
       capitalizationRate: '',
       dsgvoAccepted: false,
+      evaluationPurpose: '',
     };
   });
   const [currentStep, setCurrentStep] = useState(-1);
@@ -63,8 +64,8 @@ export default function PropertyEvaluationForm() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [showDsgvoModal, setShowDsgvoModal] = useState(false);
-  const [grokAnalysis, setGrokAnalysis] = useState(''); // Für die API-Antwort
-  const [isGrokLoading, setIsGrokLoading] = useState(false); // Für den Ladezustand der API
+  const [grokAnalysis, setGrokAnalysis] = useState('');
+  const [isGrokLoading, setIsGrokLoading] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('formData', JSON.stringify(formData));
@@ -121,7 +122,6 @@ export default function PropertyEvaluationForm() {
       title: 'Spezifische Informationen',
       icon: <FaBuilding />,
       fields: [
-        // Dynamische Felder für Einfamilienhäuser
         ...(formData.propertyType === 'einfamilienhaus' ? [
           {
             name: 'valueAddedFeatures',
@@ -138,14 +138,12 @@ export default function PropertyEvaluationForm() {
             description: 'Wählen Sie alle zutreffenden Ausstattungsmerkmale aus.',
           },
         ] : []),
-        // Dynamische Felder für Mehrfamilienhäuser
         ...(formData.propertyType === 'mehrfamilienhaus' ? [
           { name: 'numberOfUnits', label: 'Anzahl der Wohneinheiten', type: 'number', required: true, section: 'Mehrfamilienhaus', description: 'Geben Sie die Anzahl der Wohneinheiten ein (z. B. 3).' },
           { name: 'annualGrossRent', label: 'Jahresbruttomiete (€)', type: 'number', required: true, section: 'Mehrfamilienhaus', description: 'Geben Sie die gesamte Jahresbruttomiete ein (z. B. 36.000 €).' },
           { name: 'operatingCosts', label: 'Bewirtschaftungskosten (€/Jahr)', type: 'number', required: true, section: 'Mehrfamilienhaus', description: 'Geben Sie die jährlichen Bewirtschaftungskosten ein (z. B. 5.000 €).' },
           { name: 'vacancyRate', label: 'Mietausfallrisiko (%)', type: 'number', required: true, section: 'Mehrfamilienhaus', description: 'Geben Sie das Mietausfallrisiko in Prozent ein (z. B. 5 %).' },
         ] : []),
-        // Dynamische Felder für Gewerbeimmobilien
         ...(formData.propertyType === 'gewerbe' ? [
           { name: 'usableArea', label: 'Nutzfläche (m²)', type: 'number', required: true, section: 'Gewerbeimmobilie', description: 'Geben Sie die Nutzfläche in Quadratmetern ein (z. B. 200 m²).' },
           {
@@ -377,7 +375,7 @@ export default function PropertyEvaluationForm() {
           section: 'Energie',
           description: 'Wählen Sie aus, ob ein Energieausweis vorhanden ist (z. B. Nein).',
         },
-        { name: 'energyClass', label: 'Energieeffizienzklasse (falls vorhanden)', type: 'text', section: 'Energie', description: 'Geben Sie die Energieeffizienzklasse ein, falls ein Energieausweis vorhanden ist (z. B. C).' },
+        { name: 'energyClass', label: 'Energieeffizienzklasse (falls)', type: 'text', section: 'Energie', description: 'Geben Sie die Energieeffizienzklasse ein, falls ein Energieausweis vorhanden (z. B. C).' },
       ],
     },
     {
@@ -393,10 +391,10 @@ export default function PropertyEvaluationForm() {
           description: 'Geben Sie die Entfernung zu öffentlichen Verkehrsmitteln ein (z. B. 0.5 km oder 5 Minuten).',
         },
         {
-          name: 'amenitiesDistance',
+          name: prayingAverageDistance',
           label: 'Entfernung zu Schulen, Geschäften, Freizeiteinrichtungen (km)',
           type: 'text',
-          section: 'Infrastruktur',
+          sectionName: 'Infrastruktur',
           description: 'Geben Sie die Entfernung zu wichtigen Einrichtungen in Kilometern ein (z. B. 1 km).',
         },
       ],
@@ -473,36 +471,36 @@ export default function PropertyEvaluationForm() {
       textContent += `Zustand: ${response.condition}\n`;
       if (response.breakdown) {
         textContent += '\nAufschlüsselung des Verkehrswerts:\n';
-        textContent += `Bodenwert: ${response.breakdown.Bodenwert || 'Nicht verfügbar'} €\n`;
-        textContent += `Sachwert des Gebäudes: ${response.breakdown.SachwertGebäude || 'Nicht verfügbar'} €\n`;
-        textContent += `Sachwert der Garage: ${response.breakdown.SachwertGarage || 'Nicht verfügbar'} €\n`;
-        textContent += `Wert der Außenanlagen: ${response.breakdown.AußenanlagenWert || 'Nicht verfügbar'} €\n`;
-        textContent += `Marktanpassung: ${parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? '+' : '-'}${Math.abs(parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.'))).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €\n`;
-        textContent += `Abschlag (Wegerecht): -${response.breakdown.AbschlagWegerecht || 'Nicht verfügbar'} €\n`;
+        textContent += `Bodenwert: ${response.breakdown.Bodenwert || 'N/A'} €\n`;
+        textContent += `Sachwert des Gebäudes: ${response.breakdown.SachwertGebäude || 'N/A'} €\n`;
+        textContent += `Sachwert der Garage: ${response.breakdown.SachwertGarage || 'N/A'} €\n`;
+        textContent += `Wert der Außenanlagen: ${response.breakdown.AußenanlagenWert || 'N/A'} €\n`;
+        textContent += `Marktanpassung: ${parseFloat(response.breakdown.Marktanpassung ?.replace('.', '') .replace(',', '.') || 0) >= 0 ? '+' : '-'}${Math.abs(parseFloat(response.breakdown.Marktanpassung ?.replace('.', '') .replace(',', '.') || 0)).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €\n`;
+        textContent += `Abschlag (Wegerecht): -${response.breakdown.AbschlagWegerecht || 'N/A'} €\n`;
       }
       textContent += '\nPreissteigernde Faktoren:\n';
-      response.priceIncreaseFactors.forEach((factor, index) => {
+      response.priceIncreaseFactors?.forEach((factor, index) => {
         textContent += `${index + 1}. ${factor}\n`;
       });
       textContent += '\nPreissenkende Faktoren:\n';
-      response.priceDecreaseFactors.forEach((factor, index) => {
+      response.priceDecreaseFactors?.forEach((factor, index) => {
         textContent += `${index + 1}. ${factor}\n`;
       });
       if (grokAnalysis) {
-        textContent += '\nErweiterte Analyse und Expose (Grok):\n';
+        textContent += '\nErweiterte Analyse (Grok):\n';
         textContent += grokAnalysis;
       }
     }
 
     const blob = new Blob([textContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = 'immobilienbewertung.txt';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    window.URL.revokeObjectURL(url);
   };
 
   const handleSubmit = async (e) => {
@@ -532,7 +530,7 @@ export default function PropertyEvaluationForm() {
         setError(data.error || 'Fehler bei der Bewertung');
       }
     } catch (err) {
-      setError('Netzwerkfehler. Bitte versuche es erneut.');
+      setError('Netzwerkfehler. Bitte versuchen Sie es erneut.');
     } finally {
       setIsLoading(false);
     }
@@ -560,49 +558,22 @@ export default function PropertyEvaluationForm() {
     return steps[stepIndex].fields.every((field) => !field.required || formData[field.name]);
   };
 
-  // Funktion zum Erstellen des Prompts für die Grok API
   const generatePrompt = () => {
-    let prompt = '**Bewertung und Expose für eine Immobilie**\n\n';
-    prompt += '**Daten aus der Analyse:**\n';
-    prompt += `- Immobilientyp: ${formData.propertyType}\n`;
-    prompt += `- Adresse: ${formData.address}, ${formData.zipCode} ${formData.city}\n`;
-    if (response) {
-      prompt += `- Verkehrswert: ${response.price}\n`;
-      prompt += `- Lagebewertung: ${response.location}\n`;
-      prompt += `- Zustand: ${response.condition}\n`;
-      prompt += `- Preissteigernde Faktoren: ${response.priceIncreaseFactors.join(', ')}\n`;
-      prompt += `- Preissenkende Faktoren: ${response.priceDecreaseFactors.join(', ')}\n`;
-      if (response.breakdown) {
-        prompt += `- Aufschlüsselung: Bodenwert: ${response.breakdown.Bodenwert} €, Sachwert des Gebäudes: ${response.breakdown.SachwertGebäude} €, Sachwert der Garage: ${response.breakdown.SachwertGarage} €, Außenanlagen: ${response.breakdown.AußenanlagenWert} €, Marktanpassung: ${parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? '+' : '-'}${Math.abs(parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.'))).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €, Abschlag (Wegerecht): ${response.breakdown.AbschlagWegerecht} €\n`;
-      }
-    }
-    prompt += `- Wohnfläche: ${formData.livingArea} m²\n`;
-    prompt += `- Grundstücksgröße: ${formData.plotSize} m²\n`;
-    prompt += `- Baujahr: ${formData.constructionYear}\n`;
-    prompt += `- Bausubstanz: ${formData.buildingMaterial}\n`;
-    if (formData.valueAddedFeatures?.length > 0) {
-      prompt += `- Zusätzliche Ausstattung: ${formData.valueAddedFeatures.join(', ')}\n`;
-    }
-    if (formData.outdoorFacilities?.length > 0) {
-      prompt += `- Außenanlagen: ${formData.outdoorFacilities.join(', ')}\n`;
-    }
+    if (!response) return '';
 
-    prompt += '\n**Aufforderung:**\n';
-    prompt += '1. Prüfe die angegebenen Daten mit allen verfügbaren Datenquellen (z. B. aktuelle Marktdaten von Immobilienportalen wie ImmoScout24, Mietspiegel, Bodenrichtwerte von boris.nrw.de, etc.) und stelle sicher, dass die Bewertung realistisch ist.\n';
-    prompt += '2. Führe eine eigene Bewertung der Immobilie durch und vergleiche sie mit der ursprünglichen Bewertung. Begründe Abweichungen ausführlich.\n';
-    prompt += '3. Erstelle ein professionelles Expose mit:\n';
-    prompt += '   - Den Daten aus dem Fragebogen (z. B. Wohnfläche, Baujahr, Lage, Ausstattung).\n';
-    prompt += '   - Einer ausführlichen Begründung der Wertermittlung, die Marktdaten, Lage, Ausstattung und Zustand berücksichtigt.\n';
-    prompt += '   - Einem ansprechenden Beschreibungstext der Immobilie, der potenzielle Käufer anspricht.\n';
+    return `
+      Du bist ein erfahrener Immobilienexperte. Analysiere die folgenden Immobiliendaten und gib eine fundierte Bewertung ab, die den Verkehrswert, die Lage, den Zustand sowie preissteigernde und -senkende Faktoren berücksichtigt. Hebe Stärken hervor und erkläre, wie sich Schwächen relativieren lassen. Erstelle anschließend ein optimistisches, professionelles Resümee, das als Beschreibungstext für die Immobilie auf Immobilienportalen dient. Der Text soll positiv formuliert sein, die Attraktivität der Immobilie betonen und potenzielle Käufer emotional ansprechen. Verwende einen einladenden, aber sachlichen Ton und begrenze das Resümee auf 150–200 Wörter.
 
-    prompt += '\n**Antwortformat:**\n';
-    prompt += '- Beginne mit einer kurzen Zusammenfassung der Gegenprüfung und deiner eigenen Bewertung.\n';
-    prompt += '- Führe dann das Expose auf, das die Daten, die Begründung und den Beschreibungstext enthält.\n';
-
-    return prompt;
+      Daten:
+      - Verkehrswert: ${response.price}
+      - Lage: ${response.location}
+      - Zustand: ${response.condition}
+      - Preissteigernde Faktoren: ${response.priceIncreaseFactors.join(', ')}
+      - Preissenkende Faktoren: ${response.priceDecreaseFactors.join(', ')}
+      - Zusätzliche Details: ${JSON.stringify(response.breakdown)}
+    `;
   };
 
-  // Funktion zum Simulieren des Live-Schreibeffekts
   const typeText = (text, setText) => {
     let index = 0;
     const interval = setInterval(() => {
@@ -612,10 +583,9 @@ export default function PropertyEvaluationForm() {
       } else {
         clearInterval(interval);
       }
-    }, 30); // 30ms pro Zeichen
+    }, 30);
   };
 
-  // Funktion zum Abrufen der Grok API-Antwort
   const fetchGrokAnalysis = async () => {
     setIsGrokLoading(true);
     setGrokAnalysis('');
@@ -623,75 +593,46 @@ export default function PropertyEvaluationForm() {
 
     try {
       const prompt = generatePrompt();
-      const apiKey = 'xai-EChHzbrGETQzg7C0waBXVCbHmnZwSeXTbuahpnScs5vrwtKXY8BuHpvrZBbNbBkj15GjlnKmiCOtkzWD';
 
-      const res = await fetch('https://api.x.ai/v1/chat/completions', {
+      // Mock-Antwort
+      const grokResponse = `
+**Bewertung**: Die Immobilie mit einem Verkehrswert von ${response.price} besticht durch ihre Lage (${response.location}) und ihren Zustand (${response.condition}). Preissteigernde Faktoren wie ${response.priceIncreaseFactors.join(', ')} erhöhen den Wert, während Schwächen wie ${response.priceDecreaseFactors.join(', ')} durch gezielte Maßnahmen kompensierbar sind. Der Bodenwert (${response.breakdown.Bodenwert}) € sichert langfristiges Potenzial.
+
+**Resümee**: Entdecken Sie Ihr neues Zuhause! Mit einem Verkehrswert von ${response.price} bietet diese Immobilie in ${response.location.split(': ')[0]} modernen Komfort und ${response.priceIncreaseFactors[0]?.toLowerCase() || 'attraktive Eigenschaften'}. Der Zustand (${response.condition.split(', ')[0]}) lädt zum sofortigen Einzug ein. Die Lage besticht durch ${response.location.split(', ')[1] || 'optimale Erreichbarkeit'}. Vereinbaren Sie eine Besichtigung und lassen Sie sich begeistern!
+      `;
+
+      // Echte API-Anfrage (auskommentiert, bis Endpunkt bestätigt)
+      /*
+      const res = await fetch('https://api.x.ai/v1/grok', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_GROK_API_KEY}`,
         },
         body: JSON.stringify({
-          model: 'grok-3',
-          messages: [
-            { role: 'system', content: 'Du bist Grok, ein hilfreicher KI-Assistent.' },
-            { role: 'user', content: prompt },
-          ],
+          prompt,
+          max_tokens: 500,
           temperature: 0.7,
-          max_tokens: 2000,
         }),
       });
 
       if (!res.ok) {
         if (res.status === 429) {
-          throw new Error('Rate Limit überschritten. Bitte warten Sie und versuchen Sie es später erneut.');
+          throw new Error('Rate Limit überschritten. Bitte warten Sie und versuchen Sie es erneut.');
         } else if (res.status === 401) {
-          throw new Error('Ungültiger API-Schlüssel. Bitte überprüfen Sie Ihren API-Schlüssel.');
+          throw new Error('Ungültiger API-Schlüssel.');
         } else {
-          throw new Error('Fehler bei der API-Anfrage: ' + res.statusText);
+          throw new Error('Fehler: ' + res.statusText);
         }
       }
 
       const data = await res.json();
-      const grokResponse = data.choices[0].message.content;
+      const grokResponse = data.choices[0].text;
+      */
 
-      // Live-Schreibeffekt starten
       typeText(grokResponse, setGrokAnalysis);
     } catch (err) {
-      // Simulierte Antwort, da die API nicht verfügbar ist
-      const simulatedResponse = `
-### Gegenprüfung und Eigene Bewertung
-
-Nach einer Analyse der angegebenen Daten und einer Recherche aktueller Marktdaten (z. B. ImmoScout24, Mietspiegel Düsseldorf, Bodenrichtwerte von boris.nrw.de) bestätige ich, dass der Verkehrswert von 450.000 € für das Einfamilienhaus in der Musterstraße 1, Düsseldorf, größtenteils realistisch ist. Der Bodenrichtwert in dieser Lage liegt bei etwa 370 €/m², was den angegebenen Bodenwert von 185.000 € für 500 m² bestätigt. Die Marktanpassung von +32.169,94 € ist angemessen, da die Lage in Düsseldorf eine hohe Nachfrage aufweist.
-
-Meine eigene Bewertung ergibt jedoch einen leicht niedrigeren Verkehrswert von 430.000 €. Der Grund für die Abweichung ist der renovierungsbedürftige Zustand des Hauses (Sanitäranlagen, Reparaturstau), der stärkere Abschläge erfordert, insbesondere bei einem Baujahr von 1990. Die zusätzliche Ausstattung (PV-Anlage, Smart Home, umzäuntes Grundstück) gleicht dies teilweise aus, aber der Renovierungsbedarf wiegt schwerer.
-
----
-
-### Expose: Einfamilienhaus in Düsseldorf
-
-#### **Immobiliendaten**
-- **Immobilientyp**: Einfamilienhaus
-- **Adresse**: Musterstraße 1, 40210 Düsseldorf
-- **Wohnfläche**: 120 m²
-- **Grundstücksgröße**: 500 m²
-- **Baujahr**: 1990
-- **Zustand**: Renovierungsbedürftig
-- **Ausstattung**: PV-Anlage, Smart Home, umzäuntes Grundstück, Terrasse, Garten
-- **Bausubstanz**: Gemauert
-- **Verkehrswert (Grok-Bewertung)**: 430.000 €
-
-#### **Begründung der Wertermittlung**
-Der Verkehrswert von 430.000 € basiert auf einer detaillierten Analyse aktueller Marktdaten und der spezifischen Eigenschaften der Immobilie. Der Bodenrichtwert in dieser Lage beträgt 370 €/m², was einen Bodenwert von 185.000 € ergibt. Der Sachwert des Gebäudes wurde auf 150.000 € geschätzt, wobei die gemauerte Bausubstanz einen positiven Einfluss hat (+10 %). Die zusätzliche Ausstattung (PV-Anlage, Smart Home, umzäuntes Grundstück) steigert den Wert um etwa 30.000 €. Allerdings führt der renovierungsbedürftige Zustand (Sanitäranlagen, Reparaturstau) zu einem Abschlag von 10 %, und das Baujahr 1990 erfordert eine Alterswertminderung von etwa 45 % (1,5 % pro Jahr). Vergleichbare Immobilien in Düsseldorf wurden auf ImmoScout24 zwischen 400.000 € und 460.000 € gehandelt, was die Bewertung unterstützt.
-
-#### **Beschreibung der Immobilie**
-Willkommen in Ihrem neuen Zuhause in der begehrten Musterstraße 1 in Düsseldorf! Dieses charmante Einfamilienhaus bietet mit 120 m² Wohnfläche und einem großzügigen Grundstück von 500 m² viel Platz für Ihre Familie. Erbaut im Jahr 1990, besticht die Immobilie durch ihre solide gemauerte Bauweise und bietet großes Potenzial für Ihre individuellen Gestaltungsideen. Die ruhige Wohnlage in Düsseldorf, gepaart mit einer hervorragenden Anbindung an öffentliche Verkehrsmittel, macht dieses Haus besonders attraktiv. Genießen Sie sonnige Tage auf der Terrasse oder im liebevoll angelegten Garten, während moderne Features wie eine PV-Anlage und ein Smart-Home-System für nachhaltigen Komfort sorgen. Ein umzäuntes Grundstück bietet zusätzliche Privatsphäre und Sicherheit. Mit etwas Renovierungsaufwand können Sie dieses Haus in Ihr persönliches Traumdomizil verwandeln!
-`;
-
-      // Simulierte Antwort mit Live-Schreibeffekt
-      typeText(simulatedResponse, setGrokAnalysis);
-      // In einer echten Umgebung würde hier der Fehler geworfen werden:
-      // setError(err.message);
+      setError('Fehler bei der Grok-Analyse: ' + err.message);
     } finally {
       setIsGrokLoading(false);
     }
@@ -852,7 +793,6 @@ Willkommen in Ihrem neuen Zuhause in der begehrten Musterstraße 1 in Düsseldor
       }}
     >
       <div className="w-100" style={{ maxWidth: '800px' }}>
-        {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-4 px-3">
           <div className="d-flex align-items-center gap-2">
             <img src="/logo.png" alt="Stilvoll Immobilien Logo" style={{ height: '40px' }} />
@@ -865,7 +805,6 @@ Willkommen in Ihrem neuen Zuhause in der begehrten Musterstraße 1 in Düsseldor
           </div>
         </div>
 
-        {/* Fortschrittsanzeige (wird nur ab Step 0 angezeigt) */}
         {currentStep >= 0 && (
           <div className="d-flex justify-content-end mb-4 px-3">
             <div className="d-flex align-items-center gap-2">
@@ -1065,9 +1004,9 @@ Willkommen in Ihrem neuen Zuhause in der begehrten Musterstraße 1 in Düsseldor
                           </tr>
                           <tr>
                             <td>Marktanpassung</td>
-                            <td className={parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? 'text-success' : 'text-danger'}>
-                              {parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? '+' : '-'}
-                              {Math.abs(parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.'))).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                            <td className={parseFloat(response.breakdown.Marktanpassung ?.replace('.', '') .replace(',', '.') || 0) >= 0 ? 'text-success' : 'text-danger'}>
+                              {parseFloat(response.breakdown.Marktanpassung ?.replace('.', '') .replace(',', '.') || 0) >= 0 ? '+' : '-'}
+                              {Math.abs(parseFloat(response.breakdown.Marktanpassung ?.replace('.', '') .replace(',', '.') || 0)).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                             </td>
                           </tr>
                           <tr>
@@ -1083,35 +1022,29 @@ Willkommen in Ihrem neuen Zuhause in der begehrten Musterstraße 1 in Düsseldor
                   <div className="mt-4 text-start">
                     <h5 className="fs-5 fw-semibold text-dark">Preissteigernde Faktoren:</h5>
                     <ul className="list-group list-group-flush">
-                      {response.priceIncreaseFactors.slice(0, 3).map((factor, index) => (
+                      {response.priceIncreaseFactors?.slice(0, 3).map((factor, index) => (
                         <li key={index} className="list-group-item">{factor}</li>
                       ))}
                     </ul>
                     <h5 className="fs-5 fw-semibold text-dark mt-3">Preissenkende Faktoren:</h5>
                     <ul className="list-group list-group-flush">
-                      {response.priceDecreaseFactors.slice(0, 3).map((factor, index) => (
+                      {response.priceDecreaseFactors?.slice(0, 3).map((factor, index) => (
                         <li key={index} className="list-group-item">{factor}</li>
                       ))}
                     </ul>
                   </div>
                 </div>
-                {/* Neues Feld für die Grok API-Analyse */}
                 <div className="mt-4">
                   <h5 className="fs-5 fw-semibold text-dark mb-3">Erweiterte Analyse und Expose</h5>
                   <motion.button
                     onClick={fetchGrokAnalysis}
                     className="btn btn-outline-primary mb-3"
-                    style={{ padding: '12px 30px', fontSize: '16px', borderRadius: '8px', color: '#60C8E8', borderColor: '#60C8E8' }}
+                    style={{ padding: '12px 30px', fontSize: '16px', borderRadius: '8px', color: '#60C8E8 borderColor: '#60C8E8' }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     disabled={isGrokLoading}
                   >
-                    {isGrokLoading ? (
-                      <svg className="spinner-border spinner-border-sm me-2" role="status" style={{ width: '20px', height: '20px' }}>
-                        <span className="visually-hidden">Loading...</span>
-                      </svg>
-                    ) : null}
-                    Erweiterte Analyse und Expose erstellen
+                    {isGrok ? 'Analyse lädt...' : 'Erweiterte Analyse und Beschreibung erstellen'}
                   </motion.button>
                   {grokAnalysis && (
                     <textarea
@@ -1165,7 +1098,6 @@ Willkommen in Ihrem neuen Zuhause in der begehrten Musterstraße 1 in Düsseldor
         )}
       </div>
 
-      {/* DSGVO Modal */}
       {showDsgvoModal && (
         <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex="-1" role="dialog">
           <div className="modal-dialog modal-lg modal-dialog-scrollable" role="document">
@@ -1181,10 +1113,10 @@ Willkommen in Ihrem neuen Zuhause in der begehrten Musterstraße 1 in Düsseldor
                 </p>
                 <h6>1. Verantwortlicher</h6>
                 <p>
-                  Verantwortlicher im Sinne der DSGVO ist:<br />
-                  T. Kacemer<br />
-                  Wallstraße 30<br />
-                  40882 Ratingen<br />
+                  Verantwortlicher im Sinne der DSGVO ist:<br/>
+                  T. Kacemer<br/>
+                  Wallstraße 30<br/>
+                  40882 Ratingen<br/>
                   E-Mail: info@stilvoll-immobilien.de
                 </p>
                 <h6>2. Erhebung und Verarbeitung Ihrer Daten</h6>
@@ -1217,7 +1149,6 @@ Willkommen in Ihrem neuen Zuhause in der begehrten Musterstraße 1 in Düsseldor
           </div>
         </div>
       )}
-
       <footer className="mt-4 text-center text-muted" style={{ fontSize: '12px' }}>
         Wir finanzieren diesen Service über die Provision unserer Immobilienprofis
       </footer>
