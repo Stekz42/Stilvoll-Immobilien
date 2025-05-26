@@ -375,7 +375,7 @@ export default function PropertyEvaluationForm() {
           section: 'Energie',
           description: 'Wählen Sie aus, ob ein Energieausweis vorhanden ist (z. B. Nein).',
         },
-        { name: 'energyClass', label: 'Energieeffizienzklasse (falls)', type: 'text', section: 'Energie', description: 'Geben Sie die Energieeffizienzklasse ein, falls ein Energieausweis vorhanden (z. B. C).' },
+        { name: 'energyClass', label: 'Energieeffizienzklasse (falls vorhanden)', type: 'text', section: 'Energie', description: 'Geben Sie die Energieeffizienzklasse ein, falls ein Energieausweis vorhanden ist (z. B. C).' },
       ],
     },
     {
@@ -391,10 +391,10 @@ export default function PropertyEvaluationForm() {
           description: 'Geben Sie die Entfernung zu öffentlichen Verkehrsmitteln ein (z. B. 0.5 km oder 5 Minuten).',
         },
         {
-          name: prayingAverageDistance',
+          name: 'amenitiesDistance',
           label: 'Entfernung zu Schulen, Geschäften, Freizeiteinrichtungen (km)',
           type: 'text',
-          sectionName: 'Infrastruktur',
+          section: 'Infrastruktur',
           description: 'Geben Sie die Entfernung zu wichtigen Einrichtungen in Kilometern ein (z. B. 1 km).',
         },
       ],
@@ -471,36 +471,36 @@ export default function PropertyEvaluationForm() {
       textContent += `Zustand: ${response.condition}\n`;
       if (response.breakdown) {
         textContent += '\nAufschlüsselung des Verkehrswerts:\n';
-        textContent += `Bodenwert: ${response.breakdown.Bodenwert || 'N/A'} €\n`;
-        textContent += `Sachwert des Gebäudes: ${response.breakdown.SachwertGebäude || 'N/A'} €\n`;
-        textContent += `Sachwert der Garage: ${response.breakdown.SachwertGarage || 'N/A'} €\n`;
-        textContent += `Wert der Außenanlagen: ${response.breakdown.AußenanlagenWert || 'N/A'} €\n`;
-        textContent += `Marktanpassung: ${parseFloat(response.breakdown.Marktanpassung ?.replace('.', '') .replace(',', '.') || 0) >= 0 ? '+' : '-'}${Math.abs(parseFloat(response.breakdown.Marktanpassung ?.replace('.', '') .replace(',', '.') || 0)).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €\n`;
-        textContent += `Abschlag (Wegerecht): -${response.breakdown.AbschlagWegerecht || 'N/A'} €\n`;
+        textContent += `Bodenwert: ${response.breakdown.Bodenwert || 'Nicht verfügbar'} €\n`;
+        textContent += `Sachwert des Gebäudes: ${response.breakdown.SachwertGebäude || 'Nicht verfügbar'} €\n`;
+        textContent += `Sachwert der Garage: ${response.breakdown.SachwertGarage || 'Nicht verfügbar'} €\n`;
+        textContent += `Wert der Außenanlagen: ${response.breakdown.AußenanlagenWert || 'Nicht verfügbar'} €\n`;
+        textContent += `Marktanpassung: ${parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? '+' : '-'}${Math.abs(parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.'))).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €\n`;
+        textContent += `Abschlag (Wegerecht): -${response.breakdown.AbschlagWegerecht || 'Nicht verfügbar'} €\n`;
       }
       textContent += '\nPreissteigernde Faktoren:\n';
-      response.priceIncreaseFactors?.forEach((factor, index) => {
+      response.priceIncreaseFactors.forEach((factor, index) => {
         textContent += `${index + 1}. ${factor}\n`;
       });
       textContent += '\nPreissenkende Faktoren:\n';
-      response.priceDecreaseFactors?.forEach((factor, index) => {
+      response.priceDecreaseFactors.forEach((factor, index) => {
         textContent += `${index + 1}. ${factor}\n`;
       });
       if (grokAnalysis) {
-        textContent += '\nErweiterte Analyse (Grok):\n';
+        textContent += '\nErweiterte Analyse und Expose (Grok):\n';
         textContent += grokAnalysis;
       }
     }
 
     const blob = new Blob([textContent], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = 'immobilienbewertung.txt';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    URL.revokeObjectURL(url);
   };
 
   const handleSubmit = async (e) => {
@@ -530,7 +530,7 @@ export default function PropertyEvaluationForm() {
         setError(data.error || 'Fehler bei der Bewertung');
       }
     } catch (err) {
-      setError('Netzwerkfehler. Bitte versuchen Sie es erneut.');
+      setError('Netzwerkfehler. Bitte versuche es erneut.');
     } finally {
       setIsLoading(false);
     }
@@ -593,10 +593,9 @@ export default function PropertyEvaluationForm() {
 
     try {
       const prompt = generatePrompt();
-
       // Mock-Antwort
-      const grokResponse = `
-**Bewertung**: Die Immobilie mit einem Verkehrswert von ${response.price} besticht durch ihre Lage (${response.location}) und ihren Zustand (${response.condition}). Preissteigernde Faktoren wie ${response.priceIncreaseFactors.join(', ')} erhöhen den Wert, während Schwächen wie ${response.priceDecreaseFactors.join(', ')} durch gezielte Maßnahmen kompensierbar sind. Der Bodenwert (${response.breakdown.Bodenwert}) € sichert langfristiges Potenzial.
+      let grokResponse = `
+**Bewertung**: Die Immobilie mit einem Verkehrswert von ${response.price} besticht durch ihre Lage (${response.location}) und ihren Zustand (${response.condition}). Preissteigernde Faktoren wie ${response.priceIncreaseFactors.join(', ')} erhöhen den Wert, während Schwächen wie ${response.priceDecreaseFactors.join(', ')} durch gezielte Maßnahmen kompensierbar sind. Der Bodenwert (${response.breakdown.Bodenwert}) sichert langfristiges Potenzial.
 
 **Resümee**: Entdecken Sie Ihr neues Zuhause! Mit einem Verkehrswert von ${response.price} bietet diese Immobilie in ${response.location.split(': ')[0]} modernen Komfort und ${response.priceIncreaseFactors[0]?.toLowerCase() || 'attraktive Eigenschaften'}. Der Zustand (${response.condition.split(', ')[0]}) lädt zum sofortigen Einzug ein. Die Lage besticht durch ${response.location.split(', ')[1] || 'optimale Erreichbarkeit'}. Vereinbaren Sie eine Besichtigung und lassen Sie sich begeistern!
       `;
@@ -618,16 +617,16 @@ export default function PropertyEvaluationForm() {
 
       if (!res.ok) {
         if (res.status === 429) {
-          throw new Error('Rate Limit überschritten. Bitte warten Sie und versuchen Sie es erneut.');
+          throw new Error('Rate Limit überschritten. Bitte warten Sie und versuchen Sie es später erneut.');
         } else if (res.status === 401) {
-          throw new Error('Ungültiger API-Schlüssel.');
+          throw new Error('Ungültiger API-Schlüssel. Bitte überprüfen Sie Ihren API-Schlüssel.');
         } else {
-          throw new Error('Fehler: ' + res.statusText);
+          throw new Error('Fehler bei der API-Anfrage: ' + res.statusText);
         }
       }
 
       const data = await res.json();
-      const grokResponse = data.choices[0].text;
+      grokResponse = data.choices[0].text;
       */
 
       typeText(grokResponse, setGrokAnalysis);
@@ -1004,9 +1003,9 @@ export default function PropertyEvaluationForm() {
                           </tr>
                           <tr>
                             <td>Marktanpassung</td>
-                            <td className={parseFloat(response.breakdown.Marktanpassung ?.replace('.', '') .replace(',', '.') || 0) >= 0 ? 'text-success' : 'text-danger'}>
-                              {parseFloat(response.breakdown.Marktanpassung ?.replace('.', '') .replace(',', '.') || 0) >= 0 ? '+' : '-'}
-                              {Math.abs(parseFloat(response.breakdown.Marktanpassung ?.replace('.', '') .replace(',', '.') || 0)).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                            <td className={parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? 'text-success' : 'text-danger'}>
+                              {parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? '+' : '-'}
+                              {Math.abs(parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.'))).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                             </td>
                           </tr>
                           <tr>
@@ -1022,13 +1021,13 @@ export default function PropertyEvaluationForm() {
                   <div className="mt-4 text-start">
                     <h5 className="fs-5 fw-semibold text-dark">Preissteigernde Faktoren:</h5>
                     <ul className="list-group list-group-flush">
-                      {response.priceIncreaseFactors?.slice(0, 3).map((factor, index) => (
+                      {response.priceIncreaseFactors.slice(0, 3).map((factor, index) => (
                         <li key={index} className="list-group-item">{factor}</li>
                       ))}
                     </ul>
                     <h5 className="fs-5 fw-semibold text-dark mt-3">Preissenkende Faktoren:</h5>
                     <ul className="list-group list-group-flush">
-                      {response.priceDecreaseFactors?.slice(0, 3).map((factor, index) => (
+                      {response.priceDecreaseFactors.slice(0, 3).map((factor, index) => (
                         <li key={index} className="list-group-item">{factor}</li>
                       ))}
                     </ul>
@@ -1039,12 +1038,17 @@ export default function PropertyEvaluationForm() {
                   <motion.button
                     onClick={fetchGrokAnalysis}
                     className="btn btn-outline-primary mb-3"
-                    style={{ padding: '12px 30px', fontSize: '16px', borderRadius: '8px', color: '#60C8E8 borderColor: '#60C8E8' }}
+                    style={{ padding: '12px 30px', fontSize: '16px', borderRadius: '8px', color: '#60C8E8', borderColor: '#60C8E8' }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     disabled={isGrokLoading}
                   >
-                    {isGrok ? 'Analyse lädt...' : 'Erweiterte Analyse und Beschreibung erstellen'}
+                    {isGrokLoading ? (
+                      <svg className="spinner-border spinner-border-sm me-2" role="status" style={{ width: '20px', height: '20px' }}>
+                        <span className="visually-hidden">Loading...</span>
+                      </svg>
+                    ) : null}
+                    Erweiterte Analyse und Expose erstellen
                   </motion.button>
                   {grokAnalysis && (
                     <textarea
@@ -1113,10 +1117,10 @@ export default function PropertyEvaluationForm() {
                 </p>
                 <h6>1. Verantwortlicher</h6>
                 <p>
-                  Verantwortlicher im Sinne der DSGVO ist:<br/>
-                  T. Kacemer<br/>
-                  Wallstraße 30<br/>
-                  40882 Ratingen<br/>
+                  Verantwortlicher im Sinne der DSGVO ist:<br />
+                  T. Kacemer<br />
+                  Wallstraße 30<br />
+                  40882 Ratingen<br />
                   E-Mail: info@stilvoll-immobilien.de
                 </p>
                 <h6>2. Erhebung und Verarbeitung Ihrer Daten</h6>
@@ -1149,6 +1153,7 @@ export default function PropertyEvaluationForm() {
           </div>
         </div>
       )}
+
       <footer className="mt-4 text-center text-muted" style={{ fontSize: '12px' }}>
         Wir finanzieren diesen Service über die Provision unserer Immobilienprofis
       </footer>
