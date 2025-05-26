@@ -207,7 +207,7 @@ export default async function handler(req, res) {
     const Jahresreinertrag = Jahresrohertrag - Bewirtschaftungskosten - Mietausfall;
     const Bodenwertverzinsung = Bodenwert * (propertyData.capitalizationRate / 100);
     const ReinertragGebäude = Jahresreinertrag - Bodenwertverzinsung;
-        const Vervielfältiger = propertyType === 'gewerbe' ? 20 : 28.52; // Gewerbe: niedrigerer Vervielfältiger
+    const Vervielfältiger = propertyType === 'gewerbe' ? 20 : 28.52; // Gewerbe: niedrigerer Vervielfältiger
     const ErtragswertGebäude = ReinertragGebäude * Vervielfältiger;
     const VerkehrswertErtrag = ErtragswertGebäude + Bodenwert - AbschlagWegerecht;
 
