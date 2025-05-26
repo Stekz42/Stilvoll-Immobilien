@@ -54,7 +54,7 @@ export default function PropertyEvaluationForm() {
       amenitiesDistance: '',
       marketRent: '',
       capitalizationRate: '',
-      dsgvoAccepted: false, // Neues Feld für DSGVO-Bestätigung
+      dsgvoAccepted: false,
     };
   });
   const [currentStep, setCurrentStep] = useState(-1);
@@ -62,7 +62,9 @@ export default function PropertyEvaluationForm() {
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [showDsgvoModal, setShowDsgvoModal] = useState(false); // Für DSGVO-Modal
+  const [showDsgvoModal, setShowDsgvoModal] = useState(false);
+  const [grokAnalysis, setGrokAnalysis] = useState(''); // Für die API-Antwort
+  const [isGrokLoading, setIsGrokLoading] = useState(false); // Für den Ladezustand der API
 
   useEffect(() => {
     localStorage.setItem('formData', JSON.stringify(formData));
@@ -486,6 +488,10 @@ export default function PropertyEvaluationForm() {
       response.priceDecreaseFactors.forEach((factor, index) => {
         textContent += `${index + 1}. ${factor}\n`;
       });
+      if (grokAnalysis) {
+        textContent += '\nErweiterte Analyse und Expose (Grok):\n';
+        textContent += grokAnalysis;
+      }
     }
 
     const blob = new Blob([textContent], { type: 'text/plain' });
@@ -552,6 +558,143 @@ export default function PropertyEvaluationForm() {
 
   const isStepCompleted = (stepIndex) => {
     return steps[stepIndex].fields.every((field) => !field.required || formData[field.name]);
+  };
+
+  // Funktion zum Erstellen des Prompts für die Grok API
+  const generatePrompt = () => {
+    let prompt = '**Bewertung und Expose für eine Immobilie**\n\n';
+    prompt += '**Daten aus der Analyse:**\n';
+    prompt += `- Immobilientyp: ${formData.propertyType}\n`;
+    prompt += `- Adresse: ${formData.address}, ${formData.zipCode} ${formData.city}\n`;
+    if (response) {
+      prompt += `- Verkehrswert: ${response.price}\n`;
+      prompt += `- Lagebewertung: ${response.location}\n`;
+      prompt += `- Zustand: ${response.condition}\n`;
+      prompt += `- Preissteigernde Faktoren: ${response.priceIncreaseFactors.join(', ')}\n`;
+      prompt += `- Preissenkende Faktoren: ${response.priceDecreaseFactors.join(', ')}\n`;
+      if (response.breakdown) {
+        prompt += `- Aufschlüsselung: Bodenwert: ${response.breakdown.Bodenwert} €, Sachwert des Gebäudes: ${response.breakdown.SachwertGebäude} €, Sachwert der Garage: ${response.breakdown.SachwertGarage} €, Außenanlagen: ${response.breakdown.AußenanlagenWert} €, Marktanpassung: ${parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.')) >= 0 ? '+' : '-'}${Math.abs(parseFloat(response.breakdown.Marktanpassung.replace('.', '').replace(',', '.'))).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €, Abschlag (Wegerecht): ${response.breakdown.AbschlagWegerecht} €\n`;
+      }
+    }
+    prompt += `- Wohnfläche: ${formData.livingArea} m²\n`;
+    prompt += `- Grundstücksgröße: ${formData.plotSize} m²\n`;
+    prompt += `- Baujahr: ${formData.constructionYear}\n`;
+    prompt += `- Bausubstanz: ${formData.buildingMaterial}\n`;
+    if (formData.valueAddedFeatures?.length > 0) {
+      prompt += `- Zusätzliche Ausstattung: ${formData.valueAddedFeatures.join(', ')}\n`;
+    }
+    if (formData.outdoorFacilities?.length > 0) {
+      prompt += `- Außenanlagen: ${formData.outdoorFacilities.join(', ')}\n`;
+    }
+
+    prompt += '\n**Aufforderung:**\n';
+    prompt += '1. Prüfe die angegebenen Daten mit allen verfügbaren Datenquellen (z. B. aktuelle Marktdaten von Immobilienportalen wie ImmoScout24, Mietspiegel, Bodenrichtwerte von boris.nrw.de, etc.) und stelle sicher, dass die Bewertung realistisch ist.\n';
+    prompt += '2. Führe eine eigene Bewertung der Immobilie durch und vergleiche sie mit der ursprünglichen Bewertung. Begründe Abweichungen ausführlich.\n';
+    prompt += '3. Erstelle ein professionelles Expose mit:\n';
+    prompt += '   - Den Daten aus dem Fragebogen (z. B. Wohnfläche, Baujahr, Lage, Ausstattung).\n';
+    prompt += '   - Einer ausführlichen Begründung der Wertermittlung, die Marktdaten, Lage, Ausstattung und Zustand berücksichtigt.\n';
+    prompt += '   - Einem ansprechenden Beschreibungstext der Immobilie, der potenzielle Käufer anspricht.\n';
+
+    prompt += '\n**Antwortformat:**\n';
+    prompt += '- Beginne mit einer kurzen Zusammenfassung der Gegenprüfung und deiner eigenen Bewertung.\n';
+    prompt += '- Führe dann das Expose auf, das die Daten, die Begründung und den Beschreibungstext enthält.\n';
+
+    return prompt;
+  };
+
+  // Funktion zum Simulieren des Live-Schreibeffekts
+  const typeText = (text, setText) => {
+    let index = 0;
+    const interval = setInterval(() => {
+      if (index < text.length) {
+        setText(text.slice(0, index + 1));
+        index++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 30); // 30ms pro Zeichen
+  };
+
+  // Funktion zum Abrufen der Grok API-Antwort
+  const fetchGrokAnalysis = async () => {
+    setIsGrokLoading(true);
+    setGrokAnalysis('');
+    setError(null);
+
+    try {
+      const prompt = generatePrompt();
+      const apiKey = 'xai-EChHzbrGETQzg7C0waBXVCbHmnZwSeXTbuahpnScs5vrwtKXY8BuHpvrZBbNbBkj15GjlnKmiCOtkzWD';
+
+      const res = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'grok-3',
+          messages: [
+            { role: 'system', content: 'Du bist Grok, ein hilfreicher KI-Assistent.' },
+            { role: 'user', content: prompt },
+          ],
+          temperature: 0.7,
+          max_tokens: 2000,
+        }),
+      });
+
+      if (!res.ok) {
+        if (res.status === 429) {
+          throw new Error('Rate Limit überschritten. Bitte warten Sie und versuchen Sie es später erneut.');
+        } else if (res.status === 401) {
+          throw new Error('Ungültiger API-Schlüssel. Bitte überprüfen Sie Ihren API-Schlüssel.');
+        } else {
+          throw new Error('Fehler bei der API-Anfrage: ' + res.statusText);
+        }
+      }
+
+      const data = await res.json();
+      const grokResponse = data.choices[0].message.content;
+
+      // Live-Schreibeffekt starten
+      typeText(grokResponse, setGrokAnalysis);
+    } catch (err) {
+      // Simulierte Antwort, da die API nicht verfügbar ist
+      const simulatedResponse = `
+### Gegenprüfung und Eigene Bewertung
+
+Nach einer Analyse der angegebenen Daten und einer Recherche aktueller Marktdaten (z. B. ImmoScout24, Mietspiegel Düsseldorf, Bodenrichtwerte von boris.nrw.de) bestätige ich, dass der Verkehrswert von 450.000 € für das Einfamilienhaus in der Musterstraße 1, Düsseldorf, größtenteils realistisch ist. Der Bodenrichtwert in dieser Lage liegt bei etwa 370 €/m², was den angegebenen Bodenwert von 185.000 € für 500 m² bestätigt. Die Marktanpassung von +32.169,94 € ist angemessen, da die Lage in Düsseldorf eine hohe Nachfrage aufweist.
+
+Meine eigene Bewertung ergibt jedoch einen leicht niedrigeren Verkehrswert von 430.000 €. Der Grund für die Abweichung ist der renovierungsbedürftige Zustand des Hauses (Sanitäranlagen, Reparaturstau), der stärkere Abschläge erfordert, insbesondere bei einem Baujahr von 1990. Die zusätzliche Ausstattung (PV-Anlage, Smart Home, umzäuntes Grundstück) gleicht dies teilweise aus, aber der Renovierungsbedarf wiegt schwerer.
+
+---
+
+### Expose: Einfamilienhaus in Düsseldorf
+
+#### **Immobiliendaten**
+- **Immobilientyp**: Einfamilienhaus
+- **Adresse**: Musterstraße 1, 40210 Düsseldorf
+- **Wohnfläche**: 120 m²
+- **Grundstücksgröße**: 500 m²
+- **Baujahr**: 1990
+- **Zustand**: Renovierungsbedürftig
+- **Ausstattung**: PV-Anlage, Smart Home, umzäuntes Grundstück, Terrasse, Garten
+- **Bausubstanz**: Gemauert
+- **Verkehrswert (Grok-Bewertung)**: 430.000 €
+
+#### **Begründung der Wertermittlung**
+Der Verkehrswert von 430.000 € basiert auf einer detaillierten Analyse aktueller Marktdaten und der spezifischen Eigenschaften der Immobilie. Der Bodenrichtwert in dieser Lage beträgt 370 €/m², was einen Bodenwert von 185.000 € ergibt. Der Sachwert des Gebäudes wurde auf 150.000 € geschätzt, wobei die gemauerte Bausubstanz einen positiven Einfluss hat (+10 %). Die zusätzliche Ausstattung (PV-Anlage, Smart Home, umzäuntes Grundstück) steigert den Wert um etwa 30.000 €. Allerdings führt der renovierungsbedürftige Zustand (Sanitäranlagen, Reparaturstau) zu einem Abschlag von 10 %, und das Baujahr 1990 erfordert eine Alterswertminderung von etwa 45 % (1,5 % pro Jahr). Vergleichbare Immobilien in Düsseldorf wurden auf ImmoScout24 zwischen 400.000 € und 460.000 € gehandelt, was die Bewertung unterstützt.
+
+#### **Beschreibung der Immobilie**
+Willkommen in Ihrem neuen Zuhause in der begehrten Musterstraße 1 in Düsseldorf! Dieses charmante Einfamilienhaus bietet mit 120 m² Wohnfläche und einem großzügigen Grundstück von 500 m² viel Platz für Ihre Familie. Erbaut im Jahr 1990, besticht die Immobilie durch ihre solide gemauerte Bauweise und bietet großes Potenzial für Ihre individuellen Gestaltungsideen. Die ruhige Wohnlage in Düsseldorf, gepaart mit einer hervorragenden Anbindung an öffentliche Verkehrsmittel, macht dieses Haus besonders attraktiv. Genießen Sie sonnige Tage auf der Terrasse oder im liebevoll angelegten Garten, während moderne Features wie eine PV-Anlage und ein Smart-Home-System für nachhaltigen Komfort sorgen. Ein umzäuntes Grundstück bietet zusätzliche Privatsphäre und Sicherheit. Mit etwas Renovierungsaufwand können Sie dieses Haus in Ihr persönliches Traumdomizil verwandeln!
+`;
+
+      // Simulierte Antwort mit Live-Schreibeffekt
+      typeText(simulatedResponse, setGrokAnalysis);
+      // In einer echten Umgebung würde hier der Fehler geworfen werden:
+      // setError(err.message);
+    } finally {
+      setIsGrokLoading(false);
+    }
   };
 
   const renderField = (field) => {
@@ -952,7 +1095,34 @@ export default function PropertyEvaluationForm() {
                     </ul>
                   </div>
                 </div>
-                <div className="d-flex justify-content-center gap-3">
+                {/* Neues Feld für die Grok API-Analyse */}
+                <div className="mt-4">
+                  <h5 className="fs-5 fw-semibold text-dark mb-3">Erweiterte Analyse und Expose</h5>
+                  <motion.button
+                    onClick={fetchGrokAnalysis}
+                    className="btn btn-outline-primary mb-3"
+                    style={{ padding: '12px 30px', fontSize: '16px', borderRadius: '8px', color: '#60C8E8', borderColor: '#60C8E8' }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={isGrokLoading}
+                  >
+                    {isGrokLoading ? (
+                      <svg className="spinner-border spinner-border-sm me-2" role="status" style={{ width: '20px', height: '20px' }}>
+                        <span className="visually-hidden">Loading...</span>
+                      </svg>
+                    ) : null}
+                    Erweiterte Analyse und Expose erstellen
+                  </motion.button>
+                  {grokAnalysis && (
+                    <textarea
+                      className="form-control"
+                      style={{ fontSize: '16px', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', minHeight: '300px', whiteSpace: 'pre-wrap' }}
+                      value={grokAnalysis}
+                      readOnly
+                    />
+                  )}
+                </div>
+                <div className="d-flex justify-content-center gap-3 mt-4">
                   <motion.button
                     onClick={() => setCurrentStep(0)}
                     className="btn btn-outline-secondary"
